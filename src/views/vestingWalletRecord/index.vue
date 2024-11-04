@@ -14,75 +14,79 @@ import Substring from '@/components/Substring.vue'
 
 const { t } = useI18n()
 
+import { usePagination } from '@/hooks/usePagination'
+
 import { type GetTableData } from '@/api/table/types/table'
 
 import api from '@/utils/api'
 import { useUserStore } from '@/store/modules/user'
 
-import { buildContract } from '@/utils/index.ts'
+import { buildContract, toServerTime } from '@/utils/index.ts'
 
 import { exceptionHandling, toAmount } from '@/utils/index'
 
 import { ethers } from 'ethers'
 
+import { Collection, Search } from '@element-plus/icons-vue'
+
 const user = useUserStore()
 
 const loading = ref<boolean>(false)
 
+const userStore = useUserStore()
+
+const selectDate = ref<string[]>([])
+
+const handleReleaseLoading = ref<boolean>(false)
+
+const { paginationData, handleCurrentChange, handleSizeChange } = usePagination()
+
+const sumReleased = ref<number>(0)
+
+const multipleSelection = ref<GetTableData[]>([])
+
 const tableData = ref<GetTableData[]>([])
+
+const searchFormRef = ref<FormInstance>()
 
 onBeforeMount(async () => {
   getTableData()
 })
 
+const searchData = reactive({
+  account: userStore.walletAddress || userStore.username,
+  column: 'date',
+  order: 'asc',
+})
+
 const getTableData = async () => {
   loading.value = true
 
-  tableData.value = []
+  searchData.pageNo = paginationData.currentPage
+  searchData.pageSize = paginationData.pageSize
 
-  const vestingWalletList = await getVestingWalletList()
-
-  for (const item of vestingWalletList) {
-    const contract = await buildContract(item.blockchainId, item.code)
-
-    const totalAllocation = await contract.totalAllocation(user.username)
-
-    const released = await contract.released(user.username)
-    const releasable = await contract.releasable(user.username)
-    let releasableTime = await contract.releasableTime(user.username)
-
-    releasableTime = parseInt(releasableTime)
-
-    let releasableTimeStr = '-'
-
-    if (releasableTime !== 0) {
-      releasableTimeStr = new Date(releasableTime * 1000).toLocaleString()
-    }
-
-    tableData.value.push({
-      totalAllocation: ethers.formatEther(totalAllocation),
-      released: ethers.formatEther(released),
-      releasable: ethers.formatEther(releasable),
-      account: user.username,
-      contractAddress: item.address,
-      businessName: item.name,
-      blockchainNetwork: item.blockchainId_dictText,
-      blockchainId: item.blockchainId,
-      contractCode: item.code,
-      allowableReleaseTime: releasableTimeStr,
-    })
-  }
-
+  const { result } = await api.get('/mgn/vestingWalletRecord/list', searchData)
+  tableData.value = result.records
+  paginationData.total = result.total
   loading.value = false
 }
 
-async function release(blockchainId, contractCode) {
-  const contract = await buildContract(blockchainId, contractCode)
+async function release(rows) {
+  if (rows.length === 0) {
+    ElMessage.warning('Please select a row')
+    return
+  }
+
+  const blockchainId = rows[0].blockchainId
+
+  const HyperAGI_VestingWallet = await buildContract(blockchainId, 'HyperAGI_VestingWallet')
+
+  const dates = rows.map(item => item.date)
 
   loading.value = true
 
   try {
-    await (await contract.release()).wait()
+    await (await HyperAGI_VestingWallet.withdraw(dates)).wait()
     getTableData()
   } catch (e) {
     exceptionHandling(e, t)
@@ -91,20 +95,76 @@ async function release(blockchainId, contractCode) {
   loading.value = false
 }
 
-async function getVestingWalletList() {
-  const { result } = await api.get('/mgn/smartContract/list', {
-    code: 'Hyperdust_Airdrop,Hyperdust_PublicSale,Hyperdust_PrivateSale,Hyperdust_Seed',
-  })
-
-  return result.records
+function changeSelectDate(val) {
+  searchData.date_begin = null
+  searchData.date_end = null
+  if (val) {
+    searchData.date_begin = toServerTime(val[0])
+    searchData.date_end = toServerTime(val[1])
+  }
 }
+
+function rowSelectable(row, index) {
+  return row.isRelease
+}
+
+const handleSearch = () => {
+  paginationData.currentPage === 1 ? getTableData() : (paginationData.currentPage = 1)
+}
+const resetSearch = () => {
+  searchFormRef.value?.resetFields()
+  handleSearch()
+}
+
+function handleSelectionChange(e) {
+  multipleSelection.value = e
+  sumReleased.value = 0
+
+  for (const item of e) {
+    sumReleased.value += item.pendingReleaseAmount
+  }
+}
+
+function tableRowClassName(table, rowIndex) {
+  if (!table.row.isRelease) {
+    return 'warning-row'
+  }
+  return ''
+}
+
+watch([() => paginationData.currentPage, () => paginationData.pageSize], getTableData, { immediate: true })
 </script>
 
 <template>
   <div class="app-container">
+    <el-card v-loading="loading" shadow="never" class="search-wrapper">
+      <el-form ref="searchFormRef" :inline="true" :model="searchData">
+        <el-form-item label="Date">
+          <el-date-picker v-model="selectDate" @change="changeSelectDate" value-format="YYYY-MM-DD" type="daterange" />
+        </el-form-item>
+
+        <el-form-item>
+          <el-checkbox v-model="searchData.selectRelease" label="Currently Releasable" size="large" />
+        </el-form-item>
+
+        <el-form-item>
+          <el-button type="primary" :icon="Search" @click="handleSearch">{{ t('searchBtnTxt') }}</el-button>
+
+          <!-- <el-button :icon="Refresh" @click="resetSearch">重置</el-button> -->
+        </el-form-item>
+      </el-form>
+    </el-card>
+
     <el-card v-loading="loading" shadow="never">
       <div class="toolbar-wrapper">
-        <div />
+        <div>
+          <el-button type="primary" :loading="handleReleaseLoading" @click="release(multipleSelection)" :icon="Collection">
+            {{ t('baserewardReleaseRecord.release') }}
+          </el-button>
+
+          <span v-if="multipleSelection.length > 0" style="margin-left: 10px">Sum Released :{{ toAmount(sumReleased) }}HYPT</span>
+        </div>
+
         <div>
           <el-tooltip content="下载">
             <!-- <el-button type="primary" :icon="Download" circle /> -->
@@ -115,45 +175,44 @@ async function getVestingWalletList() {
         </div>
       </div>
       <div class="table-wrapper">
-        <el-table :data="tableData">
+        <el-table :data="tableData" :row-class-name="tableRowClassName" @selection-change="handleSelectionChange">
+          <el-table-column type="selection" width="55" :selectable="rowSelectable" />
+
           <el-table-column prop="account" :label="t('vestingWalletRecord.account')" align="center">
             <template #default="{ row }">
               <Substring :value="row.account"></Substring>
             </template>
           </el-table-column>
-          <el-table-column prop="businessName" :label="t('vestingWalletRecord.businessName')" align="center"> </el-table-column>
           <el-table-column prop="totalAllocation" :label="t('vestingWalletRecord.totalAllocation')" align="center">
-            <template #default="{ row }"> {{ toAmount(row.totalAllocation) }} HYPT </template>
+            <template #default="{ row }"> {{ toAmount(row.totalReleasedAmount) }} HYPT </template>
           </el-table-column>
 
           <el-table-column prop="released" :label="t('vestingWalletRecord.released')" align="center">
-            <template #default="{ row }"> {{ toAmount(row.released) }} HYPT </template>
+            <template #default="{ row }"> {{ toAmount(row.releaseAmount) }} HYPT </template>
           </el-table-column>
 
-          <el-table-column prop="allowableReleaseTime" :label="t('vestingWalletRecord.allowableReleaseTime')" align="center"> </el-table-column>
-
-          <el-table-column prop="releasable" :label="t('vestingWalletRecord.releasable')" align="center">
-            <template #default="{ row }"> {{ toAmount(row.releasable) }} HYPT </template>
+          <el-table-column prop="released" label="Pending Release Amount" align="center">
+            <template #default="{ row }"> {{ toAmount(row.pendingReleaseAmount) }} HYPT </template>
           </el-table-column>
 
-          <el-table-column prop="contractAddress" :label="t('vestingWalletRecord.contractAddress')" align="center">
-            <template #default="{ row }">
-              <Substring :value="row.contractAddress"></Substring>
-            </template>
-          </el-table-column>
+          <el-table-column prop="date" :label="t('vestingWalletRecord.allowableReleaseTime')" align="center"> </el-table-column>
 
-          <el-table-column prop="blockchainNetwork" :label="t('vestingWalletRecord.blockchainNetwork')" align="center"> </el-table-column>
+          <el-table-column prop="blockchainId_dictText" :label="t('vestingWalletRecord.blockchainNetwork')" align="center"> </el-table-column>
 
           <el-table-column fixed="right" :label="t('actionBtnTxt')" width="150" align="center">
             <template #default="{ row }">
-              <el-button @click="release(row.blockchainId, row.contractCode)" type="primary" link>{{ t('vestingWalletRecord.release') }} </el-button>
+              <el-button @click="release([row])" :disabled="!row.isRelease" type="primary" link>{{ t('vestingWalletRecord.release') }} </el-button>
             </template>
           </el-table-column>
         </el-table>
       </div>
+      <div class="pager-wrapper">
+        <el-pagination background :layout="paginationData.layout" :page-sizes="paginationData.pageSizes" :total="paginationData.total" :page-size="paginationData.pageSize" :currentPage="paginationData.currentPage" @size-change="handleSizeChange" @current-change="handleCurrentChange" />
+      </div>
     </el-card>
   </div>
 </template>
+
 
 <style lang="scss" scoped>
 .search-wrapper {
@@ -176,5 +235,9 @@ async function getVestingWalletList() {
 .pager-wrapper {
   display: flex;
   justify-content: flex-end;
+}
+
+:deep .warning-row {
+  --el-table-tr-bg-color: #606266;
 }
 </style>

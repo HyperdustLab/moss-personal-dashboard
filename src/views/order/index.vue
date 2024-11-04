@@ -137,7 +137,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
           </el-table-column>
 
           <el-table-column prop="minerNodeId" :label="t('order.nodeId')" align="center"></el-table-column>
-          <el-table-column prop="blockchain.name" :label="t('order.blockchainNetwork')" align="center"> </el-table-column>
+          <el-table-column prop="blockchainId_dictText" :label="t('order.blockchainNetwork')" align="center"> </el-table-column>
 
           <el-table-column prop="status_dictText" :label="t('order.orderStatus')" align="center"></el-table-column>
 

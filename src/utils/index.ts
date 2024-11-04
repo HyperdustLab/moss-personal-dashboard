@@ -68,7 +68,7 @@ export async function buildContract(blockchainId, smartContractCode) {
 
   const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
 
-  if (accounts[0].toLowerCase() !== user.username.toLowerCase()) {
+  if (accounts[0].toLowerCase() !== user.walletAddress.toLowerCase()) {
     throw new Error('Sorry, the current use wallet and login wallet do not match')
   }
 

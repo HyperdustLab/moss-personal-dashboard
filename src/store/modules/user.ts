@@ -10,6 +10,7 @@ import { loginApi, getUserInfoApi } from '@/api/login'
 import { type LoginRequestData } from '@/api/login/types/login'
 import { type RouteRecordRaw } from 'vue-router'
 import asyncRouteSettings from '@/config/async-route'
+import api from '@/utils/api'
 
 export const useUserStore = defineStore('user', () => {
   const token = ref<string>(getToken() || '')
@@ -18,6 +19,7 @@ export const useUserStore = defineStore('user', () => {
   const email = ref<string>('')
   const avatar = ref<string>('')
   const invitationCode = ref<string>('')
+  const walletAddress = ref<string>('')
 
   const permissionStore = usePermissionStore()
   const tagsViewStore = useTagsViewStore()
@@ -42,9 +44,10 @@ export const useUserStore = defineStore('user', () => {
   /** 获取用户详情 */
   const getInfo = async () => {
     const { result } = await getUserInfoApi()
-    username.value = result.walletAddress
+    username.value = result.username
     avatar.value = result.avatar
     email.value = result.email
+    walletAddress.value = result.walletAddress
     invitationCode.value = result.invitationCode
     // 验证返回的 roles 是否为一个非空数组，否则塞入一个没有任何作用的默认角色，防止路由守卫逻辑进入无限循环
     roles.value = ['user']
@@ -63,7 +66,13 @@ export const useUserStore = defineStore('user', () => {
     _resetTagsView()
   }
   /** 登出 */
-  const logout = () => {
+  const logout = async () => {
+    try {
+      await api.get('/sys/logout', {})
+    } catch (error) {
+      console.log(error)
+    }
+
     removeToken()
     token.value = ''
     roles.value = []
@@ -84,7 +93,7 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  return { token, roles, username, setRoles, login, getInfo, changeRoles, logout, resetToken, loginToken, avatar, invitationCode, email }
+  return { token, roles, username, setRoles, login, getInfo, changeRoles, logout, resetToken, loginToken, avatar, invitationCode, email, walletAddress }
 })
 
 /** 在 setup 外使用 */

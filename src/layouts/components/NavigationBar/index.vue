@@ -1,11 +1,10 @@
 <script lang="ts" setup>
-import { computed, ref } from 'vue'
+import { computed, ref, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import { useAppStore } from '@/store/modules/app'
 import { useSettingsStore } from '@/store/modules/settings'
 import { useUserStore } from '@/store/modules/user'
-import { UserFilled } from '@element-plus/icons-vue'
 import Hamburger from '../Hamburger/index.vue'
 import Share from '../Share/index.vue'
 import Breadcrumb from '../Breadcrumb/index.vue'
@@ -15,17 +14,29 @@ import Screenfull from '@/components/Screenfull/index.vue'
 import Notify from '@/components/Notify/index.vue'
 import { DeviceEnum } from '@/constants/app-key'
 import UploadAvatar from './uploadAvatar.vue'
+import BindEmail from './BindEmail.vue'
+import IntroductionBindAccount from '@/components/IntroductionBindAccount/index.vue'
+
+import { getBindStatus } from '@/api/login'
+
+import api from '@/utils/api'
 
 import Substring from '@/components/substring.vue'
 
+import BindAccount from './BindAccount.vue'
+
 import logoutPng from '@/assets/image/logout.png?url'
 
-import BindEmail from './BindEmail.vue'
+const introductionBindAccountRef = ref(null)
 
 const router = useRouter()
 const appStore = useAppStore()
 const settingsStore = useSettingsStore()
 const userStore = useUserStore()
+
+const bindAccountRef = ref(null)
+
+const loginRef = ref(null)
 
 const bindEmail = ref(null)
 
@@ -37,6 +48,12 @@ const { layoutMode, showNotify, showThemeSwitch, showScreenfull } = storeToRefs(
 const isTop = computed(() => layoutMode.value === 'top')
 const isMobile = computed(() => device.value === DeviceEnum.Mobile)
 
+const blockchainList = ref([])
+
+const currBlockchainId = ref(localStorage.getItem('currBlockchainId'))
+
+const currBlockchain = ref({})
+
 /** 切换侧边栏 */
 const toggleSidebar = () => {
   appStore.toggleSidebar(false)
@@ -44,13 +61,44 @@ const toggleSidebar = () => {
 
 function disconnect() {
   userStore.logout()
-  location.href = '/login'
 }
 
 function goHome() {
-  console.info(import.meta.env.VITE_HOME)
+  location.href = import.meta.env.VITE_USER + '/login?token=' + userStore.token
+}
 
-  location.href = import.meta.env.VITE_HOME + '/login?token=' + userStore.token
+async function getBlockchainList() {
+  const { result } = await api.get('/mgn/blockchain/list', { pageSize: -1, status: 'Y' })
+  blockchainList.value = result.records
+}
+
+function showBindAccount() {
+  introductionBindAccountRef.value.show('metamask')
+}
+
+onMounted(async () => {
+  await getBlockchainList()
+
+  currBlockchain.value = blockchainList.value.filter(item => item.id === currBlockchainId.value)[0]
+
+  nextTick(async () => {
+    if (userStore.token) {
+      const bindStatus = await getBindStatus()
+
+      console.info('bindStatus:', bindStatus)
+
+      if (bindStatus !== 'none') {
+        introductionBindAccountRef.value.show(bindStatus)
+      }
+    }
+  })
+})
+
+function handleCommand(command) {
+  localStorage.setItem('currBlockchainId', command)
+  currBlockchainId.value = command
+
+  currBlockchain.value = blockchainList.value.filter(item => item.id === currBlockchainId.value)[0]
 }
 
 function showUploadAvatar() {
@@ -58,81 +106,129 @@ function showUploadAvatar() {
 }
 
 function showBindEmail() {
-  bindEmail.value.show()
+  introductionBindAccountRef.value.show('email')
+}
+
+function showLogin() {
+  loginRef.value.show()
 }
 </script>
 
 <template>
-  <div class="navigation-bar">
+  <div class="navigation-bar flex justify-between items-center bg-gray-800 h-16">
     <Hamburger v-if="!isTop || isMobile" :is-active="sidebar.opened" class="hamburger" @toggle-click="toggleSidebar" />
     <Breadcrumb v-if="!isTop || isMobile" class="breadcrumb" />
     <Sidebar v-if="isTop && !isMobile" class="sidebar" />
-    <div class="right-menu">
-      <!-- <Screenfull v-if="showScreenfull" class="right-menu-item" /> -->
-      <!-- <ThemeSwitch v-if="showThemeSwitch" class="right-menu-item" /> -->
-      <!-- <Notify v-if="showNotify" class="right-menu-item" /> -->
+    <div class="right-menu flex items-center space-x-4">
+      <Screenfull v-if="showScreenfull" class="right-menu-item" />
+      <ThemeSwitch v-if="showThemeSwitch" class="right-menu-item" />
+      <Notify v-if="showNotify" class="right-menu-item" />
 
-      <el-dropdown style="width: 200px" class="custom-dropdown">
-        <span class="el-dropdown-link" style="margin-top: -5px; display: flex; align-items: center; margin-left: 20px">
-          <el-avatar :size="16" :src="userStore.avatar" />
-
-          <span style="margin-left: 5px">
-            <Substring :copys="false" color="#ffffff" fontSize="13px" :value="userStore.username"></Substring>
+      <div class="w-52">
+        <el-dropdown @command="handleCommand" class="bg-[#303133] rounded-full h-7 w-40">
+          <span class="el-dropdown-link flex items-center justify-center">
+            <el-avatar :size="20" :src="currBlockchain.icon" />
+            <span class="ml-2 w-full text-center">{{ currBlockchain.name }}</span>
+            <el-icon size="13" class="el-icon--right">
+              <arrow-down />
+            </el-icon>
           </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item v-for="(item, index) in blockchainList" :command="item.id" :style="{ 'margin-top': index === 0 ? '5px' : '10px' }" :key="index">
+                <el-avatar :size="25" :src="item.icon" />
+                <span class="text-sm ml-2.5 w-full text-center"> {{ item.name }}</span>
+              </el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+      </div>
 
+      <el-dropdown v-if="userStore.token" class="bg-gray-800 rounded-full w-52 h-7">
+        <span class="el-dropdown-link mt-[-5px] flex items-center ml-5">
+          <el-avatar :size="16" :src="userStore.avatar" />
+          <span class="ml-1.25">
+            <Substring :copys="false" color="#ffffff" fontSize="13px" :value="userStore.walletAddress || userStore.email"></Substring>
+          </span>
           <el-icon size="13" class="el-icon--right">
             <arrow-down />
           </el-icon>
         </span>
         <template #dropdown>
-          <el-card style="width: 200px">
+          <el-card class="w-75">
             <template #header>
-              <div class="card-header" style="display: flex; align-items: center">
+              <div class="card-header flex items-center">
                 <el-avatar :size="25" :src="userStore.avatar" />
-
-                <span style="margin-left: 15px">
-                  <Substring color="#ffffff" fontSize="12px" :value="userStore.username"></Substring>
+                <span class="ml-3.75">
+                  <Substring color="#ffffff" fontSize="12px" :value="userStore.walletAddress || userStore.email"></Substring>
                 </span>
               </div>
             </template>
 
-            <p style="margin-left: 5px; display: flex; align-items: center">
+            <p class="ml-1.25 flex items-center">
               <el-icon size="20">
-                <HomeFilled />
+                <User />
               </el-icon>
-
-              <el-button type="plain" @click="goHome" style="font-size: 12px" link>{{ $t('index.home') }}</el-button>
+              <el-button type="plain" @click="goHome" class="text-xs" link>{{ $t('index.dashboard') }}</el-button>
             </p>
 
-            <p style="margin-left: 5px; display: flex; align-items: center; margin-top: 30px">
+            <!-- <p class="ml-1.25 flex items-center mt-7.5">
               <SvgIcon width="1.5em" height="1.5em" name="email" />
+              <el-button type="plain" @click="showBindAccount" class="text-xs" link> Bind / Unbind </el-button>
+            </p> -->
 
-              <el-button type="plain" @click="showBindEmail" style="font-size: 12px" link>
+            <p class="ml-1.25 flex items-center mt-7.5">
+              <SvgIcon width="1.5em" height="1.5em" name="email" />
+              <el-button type="plain" @click="showBindEmail" class="text-xs" link>
                 {{ userStore.email || 'Bind Email' }}
               </el-button>
             </p>
 
-            <p style="margin-left: 5px; display: flex; align-items: center; margin-top: 30px">
+            <p class="ml-1.25 flex items-center mt-7.5">
+              <el-icon size="20">
+                <SvgIcon width="1.5em" height="1.5em" name="metamask" />
+              </el-icon>
+              <el-button type="plain" @click="showBindAccount" class="text-xs" link> Bind Wallet </el-button>
+            </p>
+
+            <p class="ml-1.25 flex items-center mt-7.5">
               <el-icon size="20">
                 <Edit />
               </el-icon>
-
-              <el-button type="plain" @click="showUploadAvatar" style="font-size: 12px" link>{{ $t('index.uploadAvatar') }}</el-button>
+              <el-button type="plain" @click="showUploadAvatar" class="text-xs" link>
+                {{ $t('index.uploadAvatar') }}
+              </el-button>
             </p>
 
-            <p style="margin-left: 5px; display: flex; align-items: center; margin-top: 30px">
-              <el-image :src="logoutPng" style="width: 20px; height: 20px"></el-image>
+            <p v-if="userStore.invitationCode" class="ml-1.25 flex items-center mt-7.5">
+              <el-icon :size="20">
+                <Share />
+              </el-icon>
+              <text class="ml-0.5">Invitation Code：</text>
+              <Substring :sub="false" :value="userStore.invitationCode"></Substring>
+            </p>
 
-              <el-button type="plain" @click="disconnect" style="font-size: 12px" link>{{ $t('index.disconnect') }}</el-button>
+            <p class="ml-1.25 flex items-center mt-7.5">
+              <el-image :src="logoutPng" class="w-5 h-5"></el-image>
+              <el-button type="plain" @click="disconnect" class="text-xs" link>
+                {{ $t('index.disconnect') }}
+              </el-button>
             </p>
           </el-card>
         </template>
+      </el-dropdown>
+
+      <el-dropdown v-else class="bg-[#303133] rounded-full w-30 h-7" trigger="contextmenu">
+        <span class="el-dropdown-link mt-1 flex items-center text-center ml-20%" @click="showLogin">
+          <span class="ml-1.5 text-center">Login</span>
+        </span>
       </el-dropdown>
     </div>
 
     <UploadAvatar ref="uploadAvatar"></UploadAvatar>
 
-    <BindEmail ref="bindEmail"></BindEmail>
+    <BindAccount ref="bindAccountRef"></BindAccount>
+    <IntroductionBindAccount ref="introductionBindAccountRef"></IntroductionBindAccount>
   </div>
 </template>
 
@@ -145,16 +241,36 @@ function showBindEmail() {
   box-shadow: none;
 }
 
-.el-dropdown-link {
-  font-size: 14px;
-  padding-top: 2%;
-  padding-left: 6%;
+::v-deep .el-avatar {
+  --el-avatar-text-color: var(--el-color-white);
+  --el-avatar-bg-color: var(--el-text-color-disabled);
+  --el-avatar-text-size: 14px;
+  --el-avatar-icon-size: 18px;
+  --el-avatar-border-radius: var(--el-border-radius-base);
+  --el-avatar-size-large: 56px;
+  --el-avatar-size-small: 24px;
+  --el-avatar-size: 40px;
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  text-align: center;
+  overflow: hidden;
+  color: var(--el-avatar-text-color);
+  background: var(--el-avatar-bg-color);
+  width: var(--el-avatar-size);
+  /* height: var(--el-avatar-size); */
 }
 
 .el-dropdown-link {
   font-size: 14px;
   padding-top: 2%;
-  padding-left: 3%;
+}
+
+.el-dropdown-link {
+  font-size: 14px;
+  padding-top: 2%;
+  padding-left: 10%;
   cursor: pointer;
 }
 
