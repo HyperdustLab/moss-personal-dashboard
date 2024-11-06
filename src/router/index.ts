@@ -40,6 +40,16 @@ export const constantRoutes: RouteRecordRaw[] = [
   },
 
   {
+    path: '/goInvite',
+    component: () => import('@/views/dashboard/goInvite.vue'),
+    name: 'goInvite',
+    meta: {
+      hidden: true,
+      name: 'goInvite',
+    },
+  },
+
+  {
     path: '/inviteSuccess/:walletAddress',
     component: () => import('@/views/dashboard/inviteSuccess.vue'),
     name: 'inviteSuccess',
@@ -51,6 +61,15 @@ export const constantRoutes: RouteRecordRaw[] = [
     path: '/share/:walletAddress',
     component: () => import('@/views/dashboard/share.vue'),
     name: 'share',
+    meta: {
+      hidden: true,
+    },
+  },
+
+  {
+    path: '/goShare',
+    component: () => import('@/views/share/index.vue'),
+    name: 'goShare',
     meta: {
       hidden: true,
     },

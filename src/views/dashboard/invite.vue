@@ -1,29 +1,47 @@
 <template>
-  <div>
-    <div v-if="isPC" class="pcBG">
-      <img class="image" sizes="(max-width: 20rem) 100vw, 20rem" @click="accept" src="../../assets/image/Accept.png" />
-    </div>
-    <div v-else class="mobileBG">
-      <img sizes="(max-width: 20rem) 100vw, 20rem" class="mobileImage" @click="accept" src="../../assets/image/Accept.png" />
+  <div class="app-container">
+    <div
+      class="bg bg-cover w-full flex flex-col items-center justify-center fixed inset-0 bg-black"
+      :style="{
+        backgroundImage: `url(${backgroundImage})`,
+        backgroundPosition: 'center',
+        backgroundSize: 'cover',
+        '@media (max-width: 768px)': {
+          backgroundPosition: 'center center',
+        },
+      }"
+    >
+      <div class="w-[95%] md:w-150 min-h-80 md:h-120 bg-black/50 backdrop-blur-sm rounded-xl md:p-8 shadow-[0_0_40px_rgba(0,0,0,0.001)] overflow-hidden">
+        <div class="h-12 md:h-15 mt-20 md:mt-0">
+          <h1 class="text-[#40E0D0] text-xl md:text-2xl font-bold text-center mb-2" style="font-family: 'Krona One', sans-serif">HyperAGI Affiliate Program</h1>
+        </div>
+        <div class="w-full h-[1px] bg-gradient-to-r from-transparent via-yellow-500 to-transparent my-2 md:my-4"></div>
+        <h2 class="text-yellow-500 text-center mb-4 md:mb-8 mt-4 md:mt-30" style="font-family: 'Montserrat-Regular', sans-serif; font-size: clamp(1.5rem, 4vw, 2rem)">Your friend is inviting youto join the program</h2>
+        <div class="text-center mt-20">
+          <p class="text-gray-200 text-sm md:text-base">Accept to earn rewards both for you and your friend</p>
+        </div>
+
+        <div class="flex justify-center">
+          <img src="@/assets/image/Accept.png" alt="Accept" class="invite-button cursor-pointer mt-50" @click="accept" style="width: 10rem; height: 3rem" />
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { ref, onMounted, onBeforeMount } from 'vue'
-import XEUtils from 'xe-utils'
 
 import { ElMessage, ElMessageBox } from 'element-plus'
 
 import { useRoute } from 'vue-router'
 
+import backgroundImage from '@/assets/image/web1.png'
+
+
 const route = useRoute()
 
 import api from '@/utils/api'
-
-const isPC = ref(false)
-
-isPC.value = !XEUtils.browse().isMobile
 
 onBeforeMount(() => {
   if (typeof window.ethereum === 'undefined') {
@@ -55,49 +73,3 @@ async function accept() {
   location.href = '/inviteSuccess/' + accounts[0]
 }
 </script>
-
-<style lang="scss" scoped>
-.pcBG {
-  background-image: url('../../assets/image/web2.svg');
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  width: 100%;
-  height: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-}
-
-.mobileBG {
-  background-image: url('../../assets/image/Mobile2.svg');
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  width: 100%;
-  height: 100%;
-  position: fixed;
-  top: 0;
-  left: 0;
-}
-
-.image {
-  width: 20rem;
-  height: 4rem;
-  top: 60%;
-  left: 50%;
-  transform: translateX(-50%);
-  cursor: pointer;
-  position: absolute;
-  image-rendering: -webkit-optimize-contrast;
-}
-
-.mobileImage {
-  width: 10rem;
-  height: 3rem;
-  top: 50%;
-  left: 50%;
-  transform: translateX(-50%);
-  image-rendering: -webkit-optimize-contrast;
-  cursor: pointer;
-  position: absolute;
-}
-</style>
