@@ -49,6 +49,12 @@ const tableData = ref<GetTableData[]>([])
 
 const searchFormRef = ref<FormInstance>()
 
+const sumData = ref<{
+  totalAllocation: number
+  released: number
+  pendingReleaseAmount: number
+}>({})
+
 onBeforeMount(async () => {
   getTableData()
 })
@@ -66,6 +72,9 @@ const getTableData = async () => {
   searchData.pageSize = paginationData.pageSize
 
   const { result } = await api.get('/mgn/vestingWalletRecord/list', searchData)
+
+  sum()
+
   tableData.value = result.records
   paginationData.total = result.total
   loading.value = false
@@ -93,6 +102,11 @@ async function release(rows) {
   }
 
   loading.value = false
+}
+
+async function sum() {
+  const { result } = await api.get('/mgn/vestingWalletRecord/sum', searchData)
+  sumData.value = result
 }
 
 function changeSelectDate(val) {
@@ -137,7 +151,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
 
 <template>
   <div class="app-container">
-    <el-card v-loading="loading" shadow="never" class="search-wrapper">
+    <el-card shadow="never" class="search-wrapper">
       <el-form ref="searchFormRef" :inline="true" :model="searchData">
         <el-form-item label="Date">
           <el-date-picker v-model="selectDate" @change="changeSelectDate" value-format="YYYY-MM-DD" type="daterange" />
@@ -197,6 +211,13 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
 
           <el-table-column prop="date" :label="t('vestingWalletRecord.allowableReleaseTime')" align="center"> </el-table-column>
 
+          <el-table-column label="Status" align="center">
+            <template #default="{ row }">
+              <el-tag v-if="row.pendingReleaseAmount > 0" type="success">Released</el-tag>
+              <el-tag v-else type="danger">Not Released</el-tag>
+            </template>
+          </el-table-column>
+
           <el-table-column prop="blockchainId_dictText" :label="t('vestingWalletRecord.blockchainNetwork')" align="center"> </el-table-column>
 
           <el-table-column fixed="right" :label="t('actionBtnTxt')" width="150" align="center">
@@ -208,6 +229,20 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
       </div>
       <div class="pager-wrapper">
         <el-pagination background :layout="paginationData.layout" :page-sizes="paginationData.pageSizes" :total="paginationData.total" :page-size="paginationData.pageSize" :currentPage="paginationData.currentPage" @size-change="handleSizeChange" @current-change="handleCurrentChange" />
+      </div>
+
+      <div class="h-80 text-center mt-20">
+        <el-tag class="text-xl h-10 pt-2" style="font-size: 1rem">
+          <span>Total Allocation: {{ toAmount(sumData.totalAllocation || 0) }}HYPT</span>
+        </el-tag>
+
+        <el-tag class="text-xl h-10 pt-2 ml-5" style="font-size: 1rem">
+          <span>Released: {{ toAmount(sumData.released || 0.0) }}HYPT</span>
+        </el-tag>
+
+        <el-tag class="text-xl h-10 pt-2 ml-5" style="font-size: 1rem">
+          <span>Pending Release Amount: {{ toAmount(sumData.pendingReleaseAmount || 0) }}HYPT</span>
+        </el-tag>
       </div>
     </el-card>
   </div>

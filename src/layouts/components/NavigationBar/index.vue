@@ -17,6 +17,9 @@ import UploadAvatar from './uploadAvatar.vue'
 import BindEmail from './BindEmail.vue'
 import IntroductionBindAccount from '@/components/IntroductionBindAccount/index.vue'
 
+
+import Login from '@/components/login/index.vue'
+
 import { getBindStatus } from '@/api/login'
 
 import api from '@/utils/api'
@@ -229,6 +232,7 @@ function showLogin() {
 
     <BindAccount ref="bindAccountRef"></BindAccount>
     <IntroductionBindAccount ref="introductionBindAccountRef"></IntroductionBindAccount>
+    <Login ref="loginRef"></Login>
   </div>
 </template>
 

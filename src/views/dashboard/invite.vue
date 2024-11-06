@@ -52,7 +52,7 @@ async function accept() {
 
   await api.post('/mgn/inviteRecord/add', { address: accounts[0], signature, inviteAddress: walletAddress })
 
-  location.href = '/inviteSuccess/' + walletAddress
+  location.href = '/inviteSuccess/' + accounts[0]
 }
 </script>
 

@@ -1,7 +1,7 @@
 <template>
-  <el-dialog v-model="dialogVisible" title="Bind Account" width="50%" @close="onClose">
+  <el-dialog v-model="dialogVisible" title="Login" width="50%" @close="onClose">
     <!-- component -->
-    <div class="relative py-16 bg-black">
+    <div class="relative py-16 bg-black h-190">
       <div class="relative m-auto px-6 text-gray-300 md:px-12 xl:px-40 h-full">
         <div class="m-auto md:w-8/12 lg:w-6/12 xl:w-10/12 h-full">
           <div class="rounded-xl shadow-xl h-full">
@@ -10,18 +10,17 @@
                 <div class="flex justify-center">
                   <img src="../../assets/layouts/logo-text-4.png" loading="lazy" class="w-40" alt="tailus logo" />
                 </div>
-                <h2 v-if="bindStatus === 'metamask'" class="mb-8 text-2xl font-bold" style="color: #4ceb75">To use the Hyperagi network, you need to use a crypto wallet. Please bind a wallet first.</h2>
-                <h2 v-else class="mb-8 text-2xl font-bold" style="color: #4ceb75">To facilitate logging into the mobile app, please bind an email address first. We recommend using your Google account or other third-party accounts to enhance convenience.</h2>
+                <h2 class="mb-8 text-2xl font-bold" style="color: #4ceb75">Sign in to unlock the best of HyperAGI.</h2>
               </div>
 
               <div class="mt-16 grid space-y-4">
-                <button v-if="bindStatus === 'email'" @click="loginWithGoogle" class="group h-12 px-6 border-2 border-gray-600 rounded-full transition duration-300 hover:border-blue-400 focus:bg-blue-900 active:bg-blue-800">
+                <button @click="loginWithGoogle" class="group h-12 px-6 border-2 border-gray-600 rounded-full transition duration-300 hover:border-blue-400 focus:bg-blue-900 active:bg-blue-800">
                   <div class="relative flex items-center justify-center">
                     <img :src="googleIcon" class="w-5 mr-2" alt="google logo" />
                     <span class="block w-max font-semibold tracking-wide text-gray-300 text-sm transition duration-300 group-hover:text-blue-400 sm:text-base">Continue with Google</span>
                   </div>
                 </button>
-                <button v-if="bindStatus === 'metamask'" @click="handleMetamaskLogin" class="group h-12 px-6 border-2 border-gray-600 rounded-full transition duration-300 hover:border-blue-400 focus:bg-blue-900 active:bg-blue-800">
+                <button @click="handleMetamaskLogin" class="group h-12 px-6 border-2 border-gray-600 rounded-full transition duration-300 hover:border-blue-400 focus:bg-blue-900 active:bg-blue-800">
                   <div class="relative flex items-center space-x-4 justify-center">
                     <img :src="metamaskIcon" class="w-5 mr-2" alt="google logo" />
                     <span class="block w-max font-semibold tracking-wide text-gray-300 text-sm transition duration-300 group-hover:text-blue-400 sm:text-base">Continue with MetaMask</span>
@@ -29,44 +28,43 @@
                 </button>
               </div>
 
-              <template v-if="bindStatus === 'email'">
-                <div class="flex items-center mb-3">
-                  <hr class="h-0 border-b border-solid border-grey-500 grow" />
-                  <p class="mx-4 text-grey-600">or</p>
-                  <hr class="h-0 border-b border-solid border-grey-500 grow" />
-                </div>
+              <div class="flex items-center mb-3">
+                <hr class="h-0 border-b border-solid border-grey-500 grow" />
+                <p class="mx-4 text-grey-600">or</p>
+                <hr class="h-0 border-b border-solid border-grey-500 grow" />
+              </div>
 
-                <div class="mt-16 grid space-y-4">
-                  <el-form ref="ruleFormRef" :model="form" :rules="rules" label-position="top">
-                    <el-form-item label="Email" prop="email">
-                      <el-input v-model="form.email" :disabled="false" />
-                    </el-form-item>
-                    <el-form-item label="Verification Code" prop="code">
-                      <el-input v-model="form.code">
-                        <template #append>
-                          <el-button :disabled="sendCodeDisabled" :loading="loading" @click="sendCode">{{ sendCodeTxt }}</el-button>
-                        </template>
-                      </el-input>
-                    </el-form-item>
-                  </el-form>
+              <div class="mt-16 grid space-y-4">
+                <el-form ref="ruleFormRef" :model="form" :rules="rules" label-position="top">
+                  <el-form-item label="Email" prop="email">
+                    <el-input v-model="form.email" :disabled="false" />
+                  </el-form-item>
+                  <el-form-item label="Verification Code" prop="code">
+                    <el-input v-model="form.code">
+                      <template #append>
+                        <el-button :disabled="sendCodeDisabled" :loading="loading" @click="sendCode">{{ sendCodeTxt }}</el-button>
+                      </template>
+                    </el-input>
+                  </el-form-item>
+                </el-form>
 
-                  <div>
-                    <div class="flex justify-center">
-                      <el-button type="primary" @click="updateEmail" class="group h-12 w-50/100 px-12 border-2 border-gray-600 rounded-full transition duration-300 hover:border-blue-400 focus:bg-blue-900 active:bg-blue-800">
-                        <div class="relative flex items-center space-x-4 justify-center">
-                          <span class="block w-max font-semibold tracking-wide text-gray-300 text-sm transition duration-300 group-hover:text-blue-400 sm:text-base">Bind with Email</span>
-                        </div>
-                      </el-button>
-                    </div>
+                <div>
+                  <div class="flex justify-center">
+                    <el-button type="primary" @click="emailLogin" class="group h-12 w-50/100 px-12 border-2 border-gray-600 rounded-full transition duration-300 hover:border-blue-400 focus:bg-blue-900 active:bg-blue-800">
+                      <div class="relative flex items-center space-x-4 justify-center">
+                        <span class="block w-max font-semibold tracking-wide text-gray-300 text-sm transition duration-300 group-hover:text-blue-400 sm:text-base">Login with Email</span>
+                      </div>
+                    </el-button>
                   </div>
                 </div>
-              </template>
+              </div>
 
-              <template v-else>
-                <div class="mt-16 grid space-y-4">
-                  <p class="text-gray-300 text-sm">Don't have a MetaMask wallet? <a href="https://chromewebstore.google.com/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknns" target="_blank" class="text-blue-400 hover:underline">Click here to register and download MetaMask wallet</a></p>
-                </div>
-              </template>
+              <div class="mt-32 space-y-4 text-gray-400 text-center sm:-mb-8">
+                <p class="text-xs">
+                  By proceeding, you agree to our <a href="https://policies.google.com/terms" class="underline" target="_blank">Terms of Use</a> and confirm you have read our <a href="https://policies.google.com/privacy" class="underline" target="_blank">Privacy and Cookie Statement</a>.
+                </p>
+                <p class="text-xs">This site is protected by reCAPTCHA and the <a href="https://policies.google.com/privacy" class="underline" target="_blank">Google Privacy Policy</a> and <a href="https://policies.google.com/terms" class="underline" target="_blank">Terms of Service</a> apply.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -90,19 +88,25 @@ const dialogVisible = ref(false)
 
 import api from '@/utils/api'
 
-const userStore = useUserStore()
+import { getBindStatus } from '@/api/login'
 
 const loginWithGoogle = () => {
-  window.open(import.meta.env.VITE_BASE_API + '/sys/thirdLogin/render/google?token=' + userStore.token, 'googleLogin', 'width=500,height=600')
+  window.open(import.meta.env.VITE_BASE_API + '/sys/thirdLogin/render/google', 'googleLogin', 'width=500,height=600')
 }
 
 const ruleFormRef = ref(null)
 
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+
+const currentRoute = ref(route.fullPath)
+
+console.info('Current Route:', currentRoute.value)
+
 const sendCodeDisabled = ref(false)
 const loading = ref(false)
 const sendCodeTxt = ref('Send')
-
-const bindStatus = ref('none')
 
 let intervalId
 const codeNum = ref(60)
@@ -129,9 +133,7 @@ const form = reactive({
   code: '',
 })
 
-function show(_bindStatus: string) {
-  bindStatus.value = _bindStatus
-
+function show() {
   dialogVisible.value = true
   window.addEventListener('message', handleMessage, false)
 
@@ -151,34 +153,9 @@ function onClose() {
 }
 
 async function handleMetamaskLogin() {
-  await metamaskBind()
-  dialogVisible.value = false
-}
+  await metamaskLogin()
 
-async function metamaskBind() {
-  // @ts-ignore
-  await window.ethereum.enable()
-  // @ts-ignore
-  const accounts = await ethereum.request({ method: 'eth_accounts' })
-
-  const data = await api.get('/sys/getPersonalSignMessage', {
-    address: accounts[0],
-  })
-
-  // @ts-ignore
-  const signature = await ethereum.request({
-    method: 'personal_sign',
-    // @ts-ignore
-    params: [data.result, accounts[0]],
-  })
-
-  // @ts-ignore
-  const { result } = await api.post('/sys/bindMetaMask', {
-    address: accounts[0],
-    signature: signature,
-  })
-
-  await useUserStore().getInfo()
+  location.reload()
 }
 
 function isValidEmail(email: string) {
@@ -194,7 +171,7 @@ async function sendCode() {
 
   loading.value = true
 
-  await api.get('/sys/sendEmailLoginCode', { email: form.email, type: 'bindEmail' })
+  await api.get('/sys/sendEmailLoginCode', { email: form.email, type: 'login' })
 
   loading.value = false
 
@@ -215,17 +192,17 @@ async function sendCode() {
   }, 1000)
 }
 
-async function updateEmail() {
+async function emailLogin() {
   const valid = await ruleFormRef.value.validate()
   if (!valid) {
     return
   }
 
-  await api.post('/sys/user/updateEmail', form)
+  const { result } = await api.post('/sys/emailLogin', form)
 
-  await useUserStore().getInfo()
+  await useUserStore().loginToken(result.token)
 
-  dialogVisible.value = false
+  location.reload()
 }
 
 defineExpose({
@@ -249,7 +226,7 @@ function handleMessage(event: any) {
 
     if (json.token) {
       useUserStore().loginToken(json.token)
-      location.href = '/'
+      location.reload()
     }
   } catch (e) {
     isJsonString = false

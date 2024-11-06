@@ -17,6 +17,7 @@ import XEUtils from 'xe-utils'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
+console.info('route.params.walletAddress', route.params.walletAddress)
 
 const isPC = ref(false)
 

@@ -40,7 +40,7 @@ const userStore = useUserStore()
 
 const dialogVisible = ref(false)
 
-const shareUrl = `${baseURI}/invite/${userStore.username}`
+const shareUrl = `${baseURI}/invite/${userStore.walletAddress}`
 
 async function copy() {
   await toClipboard(shareUrl)
