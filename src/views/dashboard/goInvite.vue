@@ -52,7 +52,7 @@ import QRCodeVue3 from 'qrcode-vue3'
 
 import useClipboard from 'vue-clipboard3'
 
-import backgroundImage from '@/assets/image/web1.png'
+import backgroundImage from '@/assets/image/web1.jpg'
 
 const { toClipboard } = useClipboard()
 

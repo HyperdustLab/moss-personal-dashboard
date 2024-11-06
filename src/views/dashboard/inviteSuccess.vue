@@ -41,7 +41,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 
 import { useRoute, useRouter } from 'vue-router'
 
-import backgroundImage from '@/assets/image/web1.png'
+import backgroundImage from '@/assets/image/web1.jpg'
 
 const route = useRoute()
 const router = useRouter()
