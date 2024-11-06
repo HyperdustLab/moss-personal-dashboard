@@ -58,15 +58,6 @@ export const constantRoutes: RouteRecordRaw[] = [
     },
   },
   {
-    path: '/share/:walletAddress',
-    component: () => import('@/views/dashboard/share.vue'),
-    name: 'share',
-    meta: {
-      hidden: true,
-    },
-  },
-
-  {
     path: '/goShare',
     component: () => import('@/views/share/index.vue'),
     name: 'goShare',
