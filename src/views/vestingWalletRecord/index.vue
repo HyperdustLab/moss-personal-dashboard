@@ -31,6 +31,8 @@ import { Collection, Search } from '@element-plus/icons-vue'
 
 const user = useUserStore()
 
+const searchStatus = ref(null)
+
 const loading = ref<boolean>(false)
 
 const userStore = useUserStore()
@@ -65,6 +67,9 @@ const searchData = reactive({
   account: userStore.walletAddress || userStore.username,
   column: 'date',
   order: 'asc',
+  date: '',
+  status: null,
+  pendingReleaseAmount: null,
 })
 
 const getTableData = async () => {
@@ -159,8 +164,17 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
           <el-date-picker v-model="selectDate" @change="changeSelectDate" value-format="YYYY-MM-DD" type="daterange" />
         </el-form-item>
 
-        <el-form-item>
+        <!-- <el-form-item>
           <el-checkbox v-model="searchData.selectRelease" label="Currently Releasable" size="large" />
+        </el-form-item> -->
+
+        <el-form-item label="Status">
+          <el-select v-model="searchData.status" clearable>
+            <el-option label="All" value=""></el-option>
+            <el-option label="To Be Released" value="1"></el-option>
+            <el-option label="Released" value="2"></el-option>
+            <el-option label="Claimed" value="3"></el-option>
+          </el-select>
         </el-form-item>
 
         <el-form-item>
@@ -203,11 +217,11 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
             <template #default="{ row }"> {{ toAmount(row.totalReleasedAmount) }} HYPT </template>
           </el-table-column>
 
-          <el-table-column prop="released" :label="t('vestingWalletRecord.released')" align="center">
+          <el-table-column prop="released" label="Claimed" align="center">
             <template #default="{ row }"> {{ toAmount(row.releaseAmount) }} HYPT </template>
           </el-table-column>
 
-          <el-table-column prop="released" label="Pending Release Amount" align="center">
+          <el-table-column prop="released" label="To Be Released" align="center">
             <template #default="{ row }"> {{ toAmount(row.pendingReleaseAmount) }} HYPT </template>
           </el-table-column>
 
