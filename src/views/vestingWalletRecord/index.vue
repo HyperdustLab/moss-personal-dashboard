@@ -8,6 +8,8 @@ import { reactive, ref, watch, onBeforeMount } from 'vue'
 
 import { useI18n } from 'vue-i18n'
 
+import dayjs from 'dayjs'
+
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from 'element-plus'
 
 import Substring from '@/components/Substring.vue'
@@ -23,9 +25,7 @@ import { useUserStore } from '@/store/modules/user'
 
 import { buildContract, toServerTime } from '@/utils/index.ts'
 
-import { exceptionHandling, toAmount } from '@/utils/index'
-
-import { ethers } from 'ethers'
+import { exceptionHandling, toAmount, compareDates } from '@/utils/index'
 
 import { Collection, Search } from '@element-plus/icons-vue'
 
@@ -48,6 +48,8 @@ const multipleSelection = ref<GetTableData[]>([])
 const tableData = ref<GetTableData[]>([])
 
 const searchFormRef = ref<FormInstance>()
+
+const currentDate = ref<string>(dayjs().format('YYYY-MM-DD'))
 
 const sumData = ref<{
   totalAllocation: number
@@ -213,8 +215,8 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
 
           <el-table-column label="Status" align="center">
             <template #default="{ row }">
-              <el-tag v-if="row.pendingReleaseAmount > 0" type="success">Released</el-tag>
-              <el-tag v-else type="danger">Not Released</el-tag>
+              <el-tag v-if="row.pendingReleaseAmount > 0" type="success">To Be Released</el-tag>
+              <el-tag v-else type="danger">Released</el-tag>
             </template>
           </el-table-column>
 
@@ -222,7 +224,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
 
           <el-table-column fixed="right" :label="t('actionBtnTxt')" width="150" align="center">
             <template #default="{ row }">
-              <el-button @click="release([row])" :disabled="!row.isRelease" type="primary" link>{{ t('vestingWalletRecord.release') }} </el-button>
+              <el-button @click="release([row])" :disabled="!row.isRelease" type="primary" link>{{ row.pendingReleaseAmount > 0 ? 'Claim' : 'Claimed' }} </el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -232,16 +234,20 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
       </div>
 
       <div class="h-80 text-center mt-20">
-        <el-tag class="text-xl h-10 pt-2" style="font-size: 1rem">
-          <span>Total Allocation: {{ toAmount(sumData.totalAllocation || 0) }}HYPT</span>
+        <el-tag size="large" class="text-xl h-14 pt-6" style="font-size: 1rem">
+          <span>Total: {{ toAmount(sumData.totalAllocation || 0) }}HYPT</span>
         </el-tag>
 
-        <el-tag class="text-xl h-10 pt-2 ml-5" style="font-size: 1rem">
-          <span>Released: {{ toAmount(sumData.released || 0.0) }}HYPT</span>
+        <el-tag size="large" class="text-xl h-14 pt-3 ml-5" style="font-size: 1rem">
+          <span>To Be Released: {{ toAmount(sumData.pendingReleaseAmount || 0.0) }}HYPT</span>
         </el-tag>
 
-        <el-tag class="text-xl h-10 pt-2 ml-5" style="font-size: 1rem">
-          <span>Pending Release Amount: {{ toAmount(sumData.pendingReleaseAmount || 0) }}HYPT</span>
+        <el-tag size="large" class="text-xl h-14 pt-3 ml-5" style="font-size: 1rem">
+          <span>Released: {{ toAmount(sumData.toBeReleased || 0) }}HYPT</span>
+        </el-tag>
+
+        <el-tag size="large" class="text-xl h-14 pt-3 ml-5" style="font-size: 1rem">
+          <span>Claimed: {{ toAmount(sumData.released || 0) }}HYPT</span>
         </el-tag>
       </div>
     </el-card>

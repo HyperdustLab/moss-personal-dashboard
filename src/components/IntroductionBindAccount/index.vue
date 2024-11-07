@@ -64,7 +64,7 @@
 
               <template v-else>
                 <div class="mt-16 grid space-y-4">
-                  <p class="text-gray-300 text-sm">Don't have a MetaMask wallet? <a href="https://chromewebstore.google.com/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknns" target="_blank" class="text-blue-400 hover:underline">Click here to register and download MetaMask wallet</a></p>
+                  <p class="text-gray-300 text-sm">Don't have a MetaMask wallet? <a href="https://chromewebstore.google.com/detail/metamask/nkbihfbeogaeaoehlefnkodbefgpgknn" target="_blank" class="text-blue-400 hover:underline">Get Wallet</a></p>
                 </div>
               </template>
             </div>

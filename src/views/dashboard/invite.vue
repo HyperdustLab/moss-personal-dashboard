@@ -13,7 +13,7 @@
     >
       <div class="w-[95%] md:w-150 min-h-80 md:h-120 bg-black/50 backdrop-blur-sm rounded-xl md:p-8 shadow-[0_0_40px_rgba(0,0,0,0.001)] overflow-hidden">
         <div class="h-12 md:h-15 mt-20 md:mt-0">
-          <h1 class="text-[#40E0D0] text-xl md:text-2xl font-bold text-center mb-2" style="font-family: 'Krona One', sans-serif">HyperAGI Affiliate Program</h1>
+          <h1 class="text-[#31ebff] text-xl md:text-2xl font-bold text-center mb-2" style="font-family: 'Krona One', sans-serif">HyperAGI Affiliate Program</h1>
         </div>
         <div class="w-full h-[1px] bg-gradient-to-r from-transparent via-yellow-500 to-transparent my-2 md:my-4"></div>
         <h2 class="text-yellow-500 text-center mb-4 md:mb-8 mt-4 md:mt-30" style="font-family: 'Montserrat-Regular', sans-serif; font-size: clamp(1.5rem, 4vw, 2rem)">Your friend is inviting youto join the program</h2>
@@ -68,6 +68,8 @@ async function accept() {
   })
 
   await api.post('/mgn/inviteRecord/add', { address: accounts[0], signature, inviteAddress: walletAddress })
+
+  localStorage.setItem('inviteWalletAddress', accounts[0])
 
   location.href = '/inviteSuccess/' + accounts[0]
 }

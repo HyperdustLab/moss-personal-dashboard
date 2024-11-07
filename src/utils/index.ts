@@ -15,16 +15,16 @@ import moment from 'moment-timezone'
 
 import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from 'element-plus'
 
-/** 格式化时间 */
+/** Format date and time */
 export const formatDateTime = (time: string | number | Date) => {
   return time ? dayjs(new Date(time)).format('YYYY-MM-DD HH:mm:ss') : 'N/A'
 }
 
-/** 用 JS 获取全局 css 变量 */
+/** Get global CSS variable value using JS */
 export const getCssVariableValue = (cssVariableName: string) => {
   let cssVariableValue = ''
   try {
-    // 没有拿到值时，会返回空串
+    // Returns an empty string if no value is obtained
     cssVariableValue = getComputedStyle(document.documentElement).getPropertyValue(cssVariableName)
   } catch (error) {
     console.error(error)
@@ -32,7 +32,7 @@ export const getCssVariableValue = (cssVariableName: string) => {
   return cssVariableValue
 }
 
-/** 用 JS 设置全局 CSS 变量 */
+/** Set global CSS variable value using JS */
 export const setCssVariableValue = (cssVariableName: string, cssVariableValue: string) => {
   try {
     document.documentElement.style.setProperty(cssVariableName, cssVariableValue)
@@ -41,7 +41,7 @@ export const setCssVariableValue = (cssVariableName: string, cssVariableValue: s
   }
 }
 
-/** 重置项目配置 */
+/** Reset project configuration */
 export const resetConfigLayout = () => {
   removeConfigLayout()
   location.reload()
@@ -172,19 +172,19 @@ export function toCustomizeAmount(amount, num) {
   let formatString = '0,0.' + '0'.repeat(num)
   let str = numeral(amount).format(formatString)
 
-  // 如果小数部分为0，最多保留2位小数
+  // If the decimal part is 0, keep up to 2 decimal places
   let floatNum = parseFloat(str.replace(/,/g, ''))
   str = floatNum.toString()
 
-  // 如果小数末尾部分为0，去掉0
+  // Remove trailing zeros in the decimal part
   str = str.replace(/\.00$/, '').replace(/(\.\d)0$/, '$1')
 
-  // 如果小数部分只有一位，补充一位0
+  // If the decimal part has only one digit, add one more 0
   if (str.indexOf('.') !== -1 && str.split('.')[1].length < 2) {
     str += '0'
   }
 
-  // 如果没有小数部分，则补充为两位小数
+  // If there is no decimal part, add two decimal places
   if (str.indexOf('.') === -1) {
     str += '.00'
   }
@@ -211,10 +211,10 @@ export function toServerTime(dateStr) {
 }
 
 export function exceptionHandling(e, t) {
-  console.error('Error details:', e) // 输出完整的错误详情
+  console.error('Error details:', e) // Output complete error details
 
   if (!e.code) {
-    // 检查网络相关的错误
+    // Check for network-related errors
     if (e.message.includes('Failed to fetch') || e.message.includes('Network Error')) {
       ElMessage.error(t('errors.networkError'))
       return
@@ -222,18 +222,32 @@ export function exceptionHandling(e, t) {
   }
 
   const error = e.info.error
-  // RPC错误处理
+  // RPC error handling
   if (error.code && error.code === 4001) {
-    // 用户拒绝了交易请求
+    // User rejected the transaction request
     ElMessage.error(t('errors.transactionRejectedByUser'))
   } else if (error.code && error.code === -32000) {
-    // 服务器拒绝了请求，可能是因为gas价格太低
+    // Server rejected the request, possibly due to low gas price
     ElMessage.error(t('errors.serverRejectedRequest'))
   } else if (e.reason) {
-    // 合约抛出的错误
+    // Contract error
     ElMessage.error(t('errors.contractError', { reason: e.reason }))
   } else {
-    // 其他类型的错误
+    // Other types of errors
     ElMessage.error(e.message || t('errors.unknownError'))
+  }
+}
+
+export function compareDates(date1, date2) {
+  const format = 'YYYY-MM-DD'
+  const d1 = moment(date1, format)
+  const d2 = moment(date2, format)
+
+  if (d1.isBefore(d2)) {
+    return -1 // Return -1 indicates date1 is before date2
+  } else if (d1.isAfter(d2)) {
+    return 1 // Return 1 indicates date1 is after date2
+  } else {
+    return 0 // Return 0 indicates date1 is the same as date2
   }
 }

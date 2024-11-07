@@ -28,12 +28,14 @@ const { paginationData, handleCurrentChange, handleSizeChange } = usePagination(
 const tableData = ref<GetTableData[]>([])
 const searchFormRef = ref<FormInstance | null>(null)
 
-const orderStatus = ref([])
+const userStore = useUserStore()
 
-onBeforeMount(async () => {})
+onBeforeMount(async () => {
+  localStorage.setItem('inviteWalletAddress', userStore.walletAddress)
+})
 
 const searchData = reactive({
-  pAccount: useUserStore().username,
+  pAccount: useUserStore().walletAddress,
   column: 'createTime',
   order: 'desc',
 })
@@ -82,7 +84,7 @@ async function loadNode(node, treeNode, resolve) {
 
 async function getlevel(recordId) {
   const { result } = await api.get('/mgn/inviteRecord/getlevel', {
-    pAccount: useUserStore().username,
+    pAccount: useUserStore().walletAddress,
     recordId: recordId,
   })
 
