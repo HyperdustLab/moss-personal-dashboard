@@ -213,24 +213,33 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
               <Substring :value="row.account"></Substring>
             </template>
           </el-table-column>
-          <el-table-column prop="totalAllocation" :label="t('vestingWalletRecord.totalAllocation')" align="center">
+          <el-table-column prop="totalAllocation" label="Total" align="center">
             <template #default="{ row }"> {{ toAmount(row.totalReleasedAmount) }} HYPT </template>
           </el-table-column>
 
-          <el-table-column prop="released" label="Claimed" align="center">
+          <el-table-column label="Claimed" align="center">
             <template #default="{ row }"> {{ toAmount(row.releaseAmount) }} HYPT </template>
           </el-table-column>
 
-          <el-table-column prop="released" label="To Be Released" align="center">
+          <el-table-column label="To Be Released" align="center">
             <template #default="{ row }"> {{ toAmount(row.pendingReleaseAmount) }} HYPT </template>
+          </el-table-column>
+
+          <el-table-column label="Claimed" align="center">
+            <template #default="{ row }"> {{ toAmount(row.releaseAmount) }} HYPT </template>
           </el-table-column>
 
           <el-table-column prop="date" :label="t('vestingWalletRecord.allowableReleaseTime')" align="center"> </el-table-column>
 
           <el-table-column label="Status" align="center">
             <template #default="{ row }">
-              <el-tag v-if="row.pendingReleaseAmount > 0" type="success">To Be Released</el-tag>
-              <el-tag v-else type="danger">Released</el-tag>
+              <template v-if="row.pendingReleaseAmount > 0">
+                <el-tag v-if="row.date === currentDate || compareDates(currentDate, row.date) === 1" type="primary">Released</el-tag>
+                <el-tag v-else type="success">To Be Released</el-tag>
+              </template>
+              <template v-else>
+                <el-tag type="warning">Claimed</el-tag>
+              </template>
             </template>
           </el-table-column>
 
@@ -253,15 +262,15 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
         </el-tag>
 
         <el-tag size="large" class="text-xl h-14 pt-3 ml-5" style="font-size: 1rem">
-          <span>To Be Released: {{ toAmount(sumData.pendingReleaseAmount || 0.0) }}HYPT</span>
+          <span>To Be Released: {{ toAmount(sumData.toBeReleased || 0.0) }}HYPT</span>
         </el-tag>
 
         <el-tag size="large" class="text-xl h-14 pt-3 ml-5" style="font-size: 1rem">
-          <span>Released: {{ toAmount(sumData.toBeReleased || 0) }}HYPT</span>
+          <span>Released: {{ toAmount(sumData.released || 0) }}HYPT</span>
         </el-tag>
 
         <el-tag size="large" class="text-xl h-14 pt-3 ml-5" style="font-size: 1rem">
-          <span>Claimed: {{ toAmount(sumData.released || 0) }}HYPT</span>
+          <span>Claimed: {{ toAmount(sumData.releaseAmount || 0) }}HYPT</span>
         </el-tag>
       </div>
     </el-card>
