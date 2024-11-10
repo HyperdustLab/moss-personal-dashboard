@@ -8,8 +8,6 @@ import { reactive, ref, watch, onBeforeMount } from 'vue'
 
 import { useI18n } from 'vue-i18n'
 
-const chargeHistory = ref(null)
-
 const { t } = useI18n()
 
 import { type GetTableData } from '@/api/table/types/table'
@@ -20,8 +18,6 @@ import { useUserStore } from '@/store/modules/user'
 
 import { toLocalTime } from '@/utils/index'
 
-import Share from '@/views/share/index.vue'
-
 const loading = ref<boolean>(false)
 const { paginationData, handleCurrentChange, handleSizeChange } = usePagination()
 
@@ -29,6 +25,8 @@ const tableData = ref<GetTableData[]>([])
 const searchFormRef = ref<FormInstance | null>(null)
 
 const userStore = useUserStore()
+
+const drawer = ref(false)
 
 onBeforeMount(async () => {
   localStorage.setItem('inviteWalletAddress', userStore.walletAddress)
@@ -58,14 +56,10 @@ const resetSearch = () => {
   handleSearch()
 }
 
-function openChargeHistory(row) {
-  chargeHistory.value.show(row)
-}
-
 async function loadNode(node, treeNode, resolve) {
   const level = await getlevel(node.id)
 
-  if (level > 4) {
+  if (level > 2) {
     node.loading = false
     return resolve([])
   } else {
@@ -91,52 +85,63 @@ async function getlevel(recordId) {
   return result
 }
 
+function showDrawer() {
+  drawer.value = true
+}
+
+defineExpose({
+  showDrawer,
+})
+
 //#endregion
 
 /** 监听分页参数的变化 */
 watch([() => paginationData.currentPage, () => paginationData.pageSize], getTableData, { immediate: true })
 </script>
 
+
 <template>
-  <div class="app-container">
-    <!-- Share组件不再固定定位 -->
-    <Share class="share-component"></Share>
+  <el-drawer v-model="drawer" size="70%" title="My Invitation Records">
+    <template #title>
+      <h4>My Invitation Records</h4>
+    </template>
 
-    <!-- 移除滚动容器的样式 -->
-    <div class="table-container">
-      <el-card v-loading="loading" shadow="never" class="search-wrapper mt-140">
-        <el-form ref="searchFormRef" :inline="true" :model="searchData"> </el-form>
-      </el-card>
+    <div class="app-container">
+      <!-- 移除滚动容器的样式 -->
+      <div class="table-container">
+        <el-card v-loading="loading" shadow="never" class="search-wrapper">
+          <el-form ref="searchFormRef" :inline="true" :model="searchData"> </el-form>
+        </el-card>
 
-      <el-card v-loading="loading" shadow="never">
-        <div class="toolbar-wrapper">
-          <div />
-          <div>
-            <el-tooltip content="下载">
-              <!-- <el-button type="primary" :icon="Download" circle /> -->
-            </el-tooltip>
-            <el-tooltip content="刷新当前页">
-              <!-- <el-button type="primary" :icon="RefreshRight" circle @click="getTableData" /> -->
-            </el-tooltip>
+        <el-card v-loading="loading" shadow="never">
+          <div class="toolbar-wrapper">
+            <div>
+              <el-tooltip content="下载">
+                <!-- <el-button type="primary" :icon="Download" circle /> -->
+              </el-tooltip>
+              <el-tooltip content="刷新当前页">
+                <!-- <el-button type="primary" :icon="RefreshRight" circle @click="getTableData" /> -->
+              </el-tooltip>
+            </div>
           </div>
-        </div>
-        <div class="table-wrapper">
-          <el-table :data="tableData" lazy row-key="id" :load="loadNode" :tree-props="{ children: 'children', hasChildren: 'hasChild' }">
-            <el-table-column prop="walletAddress" :label="t('shareRecord.walletAddress')" align="center"> </el-table-column>
+          <div class="table-wrapper">
+            <el-table :data="tableData" lazy row-key="id" :load="loadNode" :tree-props="{ children: 'children', hasChildren: 'hasChild' }">
+              <el-table-column prop="walletAddress" :label="t('shareRecord.walletAddress')" align="center"> </el-table-column>
 
-            <el-table-column prop="createTime" :label="t('shareRecord.createTime')" align="center">
-              <template #default="{ row }">{{ toLocalTime(row.createTime) }}</template>
-            </el-table-column>
+              <el-table-column prop="createTime" :label="t('shareRecord.createTime')" align="center">
+                <template #default="{ row }">{{ toLocalTime(row.createTime) }}</template>
+              </el-table-column>
 
-            <!-- your columns here -->
-          </el-table>
-        </div>
-        <div class="pager-wrapper">
-          <el-pagination background :layout="paginationData.layout" :page-sizes="paginationData.pageSizes" :total="paginationData.total" :page-size="paginationData.pageSize" :currentPage="paginationData.currentPage" @size-change="handleSizeChange" @current-change="handleCurrentChange" />
-        </div>
-      </el-card>
+              <!-- your columns here -->
+            </el-table>
+          </div>
+          <div class="pager-wrapper">
+            <el-pagination background :layout="paginationData.layout" :page-sizes="paginationData.pageSizes" :total="paginationData.total" :page-size="paginationData.pageSize" :currentPage="paginationData.currentPage" @size-change="handleSizeChange" @current-change="handleCurrentChange" />
+          </div>
+        </el-card>
+      </div>
     </div>
-  </div>
+  </el-drawer>
 </template>
 
 <style lang="scss" scoped>
@@ -161,23 +166,6 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
   display: flex;
   justify-content: flex-end;
 }
-
-.app-container {
-  // 移除 overflow: hidden
-  padding: 20px;
-}
-
-.share-component {
-  width: 100%;
-  height: 70vh;
-  margin-bottom: 20px;
-}
-
-.table-container {
-  // 移除定位和滚动相关样式
-  margin-top: 0;
-  height: auto;
-  overflow: visible;
-  padding: 0;
-}
 </style>
+
+

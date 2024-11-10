@@ -247,7 +247,7 @@ export const constantRoutes: RouteRecordRaw[] = [
     children: [
       {
         path: '/shareRecord/index',
-        component: () => import('@/views/ShareRecord/index.vue'),
+        component: () => import('@/views/share/index.vue'),
         name: 'ShareRecord',
 
         meta: {
