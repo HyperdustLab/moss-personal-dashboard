@@ -170,13 +170,13 @@ function show(record) {
 }
 
 async function getAccountPledgeNum() {
-  const { result } = await api.get('/mgn/minerNftPledge/list', { account: user.username, status: '1', pageSize: 1, blockchainId: currBlockchain.value.id })
+  const { result } = await api.get('/mgn/minerNftPledge/list', { account: user.walletAddress || user.username, status: '1', pageSize: 1, blockchainId: currBlockchain.value.id })
 
   return result.total
 }
 
 async function getMinerNodeNum() {
-  const { result } = await api.get('/mgn/minerNode/list', { incomeAddress: user.username, status: '0,1,2', pageSize: 1, blockchainId: currBlockchain.value.id })
+  const { result } = await api.get('/mgn/minerNode/list', { incomeAddress: user.walletAddress || user.username, status: '0,1,2', pageSize: 1, blockchainId: currBlockchain.value.id })
 
   return result.total
 }

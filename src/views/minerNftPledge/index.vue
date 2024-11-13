@@ -33,7 +33,7 @@ const tableData = ref<GetTableData[]>([])
 const searchFormRef = ref<FormInstance | null>(null)
 
 const searchData = reactive({
-  account: useUserStore().username,
+  account: useUserStore().walletAddress || useUserStore().username,
   column: 'createTime',
   order: 'desc',
 })

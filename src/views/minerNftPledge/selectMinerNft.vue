@@ -33,7 +33,7 @@ const tableData = ref<GetTableData[]>([])
 const searchFormRef = ref<FormInstance | null>(null)
 
 const searchData = reactive({
-  owner: useUserStore().username,
+  owner: useUserStore().walletAddress || useUserStore().username,
   blockchainId: '',
   column: 'createTime',
   order: 'desc',

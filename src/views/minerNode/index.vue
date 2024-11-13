@@ -59,7 +59,7 @@ onBeforeMount(async () => {
 })
 
 const searchData = reactive({
-  incomeAddress: useUserStore().username,
+  incomeAddress: useUserStore().walletAddress || useUserStore().username,
   column: 'createTime',
   order: 'desc',
   selectCountAward: true,
@@ -138,7 +138,7 @@ async function handleActive(node) {
 
     const HyperAGI_Miner_NFT_Pledge = await buildContract(node.blockchainId, 'HyperAGI_Miner_NFT_Pledge')
 
-    const pledgeNumArray = await HyperAGI_Miner_NFT_Pledge.getAccountPledgeNum(user.username)
+    const pledgeNumArray = await HyperAGI_Miner_NFT_Pledge.getAccountPledgeNum(user.walletAddress)
 
     console.info('pledgeNumArray:', pledgeNumArray)
 
