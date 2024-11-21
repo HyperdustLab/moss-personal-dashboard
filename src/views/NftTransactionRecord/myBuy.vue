@@ -1,23 +1,23 @@
 <script lang="ts" setup>
 defineOptions({
   // 命名当前组件
-  name: "myBuyNftTransaction"
+  name: 'myBuyNftTransaction',
 })
 
-import { reactive, ref, watch, onBeforeMount } from "vue"
+import { reactive, ref, watch, onBeforeMount } from 'vue'
 
-import { useI18n } from "vue-i18n"
+import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
-import { type GetTableData } from "@/api/table/types/table"
-import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from "element-plus"
-import { usePagination } from "@/hooks/usePagination"
-import api from "@/utils/api"
-import { useUserStore } from "@/store/modules/user"
-import Substring from "@/components/Substring.vue"
+import { type GetTableData } from '@/api/table/types/table'
+import { type FormInstance, type FormRules, ElMessage, ElMessageBox } from 'element-plus'
+import { usePagination } from '@/hooks/usePagination'
+import api from '@/utils/api'
+import { useUserStore } from '@/store/modules/user'
+import Substring from '@/components/Substring.vue'
 
-import { toAmount, toLocalTime, toServerTime } from "@/utils/index"
+import { toAmount, toLocalTime, toServerTime } from '@/utils/index'
 
 const loading = ref<boolean>(false)
 const { paginationData, handleCurrentChange, handleSizeChange } = usePagination()
@@ -29,12 +29,12 @@ const sumData = ref(null)
 const blockchainList = ref([])
 
 const searchData = reactive({
-  column: "createTime",
-  order: "desc",
-  buyer: useUserStore().username,
-  blockNumber: "",
-  createTime_begin: "",
-  createTime_end: ""
+  column: 'createTime',
+  order: 'desc',
+  buyer: useUserStore().walletAddress || useUserStore().username,
+  blockNumber: '',
+  createTime_begin: '',
+  createTime_end: '',
 })
 
 onBeforeMount(async () => {
@@ -47,7 +47,7 @@ const getTableData = async () => {
   searchData.pageNo = paginationData.currentPage
   searchData.pageSize = paginationData.pageSize
 
-  const { result } = await api.get("/mgn/nftTransactionRecord/list", searchData)
+  const { result } = await api.get('/mgn/nftTransactionRecord/list', searchData)
 
   sum()
   tableData.value = result.records
@@ -57,8 +57,8 @@ const getTableData = async () => {
 const handleSearch = () => {
   console.info(searchData)
 
-  searchData.createTime_begin = ""
-  searchData.createTime_end = ""
+  searchData.createTime_begin = ''
+  searchData.createTime_end = ''
 
   if (createTimes.value) {
     searchData.createTime_begin = toServerTime(createTimes.value[0])
@@ -74,12 +74,12 @@ const resetSearch = () => {
 }
 
 async function sum() {
-  const { result } = await api.get("/mgn/nftTransactionRecord/sum", searchData)
+  const { result } = await api.get('/mgn/nftTransactionRecord/sum', searchData)
   sumData.value = result
 }
 
 async function getBlockchainList() {
-  const { result } = await api.get("/mgn/blockchain/list", { status: "Y", pageSize: -1 })
+  const { result } = await api.get('/mgn/blockchain/list', { status: 'Y', pageSize: -1 })
 
   blockchainList.value = result.records
 }
@@ -116,7 +116,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
           <el-date-picker v-model="createTimes" type="daterange" value-format="YYYY-MM-DD" />
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" :icon="Search" @click="handleSearch">{{ t("searchBtnTxt") }}</el-button>
+          <el-button type="primary" :icon="Search" @click="handleSearch">{{ t('searchBtnTxt') }}</el-button>
           <!-- <el-button :icon="Refresh" @click="resetSearch">重置</el-button> -->
         </el-form-item>
       </el-form>
@@ -147,8 +147,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
             </template>
           </el-table-column>
 
-          <el-table-column prop="tokenId" :label="t('NftTransactionRecord.tokenId')" align="center">
-          </el-table-column>
+          <el-table-column prop="tokenId" :label="t('NftTransactionRecord.tokenId')" align="center"> </el-table-column>
 
           <el-table-column width="160" :label="t('NftTransactionRecord.contractAddress')" align="center">
             <template #default="{ row }">
@@ -173,16 +172,11 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
             <template #default="{ row }"> {{ toAmount(row.commission) }}HYPT </template>
           </el-table-column>
 
-          <el-table-column prop="blockchainId_dictText" :label="t('NftTransactionRecord.blockchain')" align="center">
-          </el-table-column>
+          <el-table-column prop="blockchainId_dictText" :label="t('NftTransactionRecord.blockchain')" align="center"> </el-table-column>
           <el-table-column prop="transactionHash" :label="t('NftTransactionRecord.transactionHash')" align="center">
-
             <template #default="{ row }">
-
               <Substring :value="row.transactionHash"></Substring>
-
             </template>
-
           </el-table-column>
 
           <el-table-column width="180" prop="createTime" :label="t('NftTransactionRecord.createTime')" align="center">
@@ -197,7 +191,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
 
     <div style="height: 60px; text-align: center; margin-top: 20px">
       <el-tag style="font-size: 15px; height: 40px; padding-top: 10px">
-        <span>{{ $t("NftTransactionRecord.payAmount") }}: {{ toAmount(sumData || 0) }}HYPT</span>
+        <span>{{ $t('NftTransactionRecord.payAmount') }}: {{ toAmount(sumData || 0) }}HYPT</span>
       </el-tag>
     </div>
   </div>

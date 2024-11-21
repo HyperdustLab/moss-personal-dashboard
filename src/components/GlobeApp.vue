@@ -40,7 +40,7 @@ async function openApp(sid) {
 
   const user = useUserStore()
 
-  if (!user.username) {
+  if (!user.walletAddress) {
     await metamaskLogin()
   }
 

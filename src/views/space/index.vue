@@ -33,7 +33,7 @@ const name = ref(null)
 const spaceForm = ref(null)
 
 const searchData = reactive({
-  account: useUserStore().username,
+  account: useUserStore().walletAddress || useUserStore().username,
   sid: '',
   searchTxt: '',
 })

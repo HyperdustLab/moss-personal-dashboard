@@ -40,7 +40,7 @@ onBeforeMount(async () => {
 })
 
 const searchData = reactive({
-  account: useUserStore().username,
+  account: useUserStore().walletAddress || useUserStore().username,
   column: 'createTime',
   order: 'desc',
   blockNumber: '',

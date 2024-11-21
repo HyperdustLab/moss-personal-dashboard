@@ -36,7 +36,7 @@ const searchFormRef = ref<FormInstance | null>(null)
 const sumData = ref({})
 
 const searchData = reactive({
-  nodeOwner: useUserStore().username,
+  nodeOwner: useUserStore().walletAddress || useUserStore().username,
   column: 'createTime',
   order: 'desc',
   createTime_begin: '',

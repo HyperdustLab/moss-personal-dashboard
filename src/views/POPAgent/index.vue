@@ -31,7 +31,7 @@ const searchFormRef = ref<FormInstance | null>(null)
 const refPOPAgentForm = ref(null)
 
 const searchData = reactive({
-  owner: useUserStore().username,
+  owner: useUserStore().walletAddress || useUserStore().username,
   typeCode: '008003',
 })
 

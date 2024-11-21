@@ -15,7 +15,7 @@ const userStore = useUserStore()
 
 const dialogVisible = ref(false)
 
-const shareUrl = `${baseURI}/mgn/invite/${userStore.username}`
+const shareUrl = `${baseURI}/mgn/invite/${userStore.walletAddress || userStore.username}`
 </script>
 
 <template>
