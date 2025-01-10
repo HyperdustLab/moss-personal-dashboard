@@ -17,7 +17,7 @@ import api from '@/utils/api'
 import { useUserStore } from '@/store/modules/user'
 import POPAgentForm from './POPAgentForm.vue'
 import Substring from '@/components/Substring.vue'
-
+import Moretext from '@/components/Moretext.vue'
 const loading = ref<boolean>(false)
 const { paginationData, handleCurrentChange, handleSizeChange } = usePagination()
 
@@ -135,9 +135,9 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
             </template>
           </el-table-column>
 
-          <el-table-column label="Agent Personalization" align="center">
+          <el-table-column width="300" label="Agent Personalization" align="center">
             <template #default="{ row }">
-              <template v-if="row.agent">{{ row.agent.personalization }} </template>
+              <Moretext :text="row.agent.personalization" />
             </template>
           </el-table-column>
 
