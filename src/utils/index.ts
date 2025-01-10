@@ -134,7 +134,7 @@ async function getBlockchain(id) {
   return result
 }
 
-async function getSmartContractByCode(code, blockchainId) {
+export async function getSmartContractByCode(code, blockchainId) {
   const { result } = await api.get('/mgn/smartContract/getSmartContractByCode', { code, blockchainId })
 
   return result

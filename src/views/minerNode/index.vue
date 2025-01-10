@@ -7,20 +7,16 @@ defineOptions({
 import { onBeforeMount, reactive, ref, watch } from 'vue'
 
 import { useI18n } from 'vue-i18n'
-import { ethers } from 'ethers'
-
-import { toAmount, buildContract, exceptionHandling } from '@/utils/index'
 
 import { type GetTableData } from '@/api/table/types/table'
 import { ElMessage, type FormInstance, ElLoading } from 'element-plus'
 import { usePagination } from '@/hooks/usePagination'
+import PledgeDialog from './PledgeDialog.vue'
+
+import { toAmount } from '@/utils/index'
 
 import api from '@/utils/api'
 import { useUserStore } from '@/store/modules/user'
-
-import SelectMinerNft from '@/views/minerNftPledge/SelectMinerNft.vue'
-
-import MinerNftPledge from '@/views/minerNftPledge/index.vue'
 
 import { useRouter } from 'vue-router'
 
@@ -28,7 +24,7 @@ const { t } = useI18n()
 
 const router = useRouter()
 
-const minerNftPledge = ref(null)
+const pledgeDialogRef = ref(null)
 
 const loading = ref<boolean>(false)
 const { paginationData, handleCurrentChange, handleSizeChange } = usePagination()
@@ -40,17 +36,9 @@ const status = ref([])
 const networkStatus = ref([])
 const serviceStatus = ref([])
 
-const user = useUserStore()
-
-let gLoading = null
-
-const selectNode = ref(null)
-
 const minerNodeForm = ref(null)
 
 const multipleSelection = ref([])
-
-const selectMinerNftRef = ref(null)
 
 onBeforeMount(async () => {
   status.value = await api.getDictItems('MinerNode_status')
@@ -83,6 +71,10 @@ const resetSearch = () => {
   handleSearch()
 }
 
+function openMinerNftPledge(node) {
+  pledgeDialogRef.value.show(node)
+}
+
 function showMinerNodeForm(record) {
   minerNodeForm.value.show(record)
 }
@@ -112,76 +104,6 @@ async function batchUpdateServiceStatus(serviceStatus) {
 
 function handleSelectionChange(e) {
   multipleSelection.value = e
-}
-
-function openMinerNftPledge() {
-  minerNftPledge.value.show()
-}
-
-async function active(node) {
-  const HyperAGI_Node_Mgr = await buildContract(node.blockchainId, 'HyperAGI_Node_Mgr')
-
-  await (await HyperAGI_Node_Mgr.active(node.minerNodeId, { value: BigInt(node.fee) })).wait()
-
-  gLoading.close()
-  ElMessage.success('Activated successfully')
-  handleSearch()
-}
-
-async function handleActive(node) {
-  try {
-    gLoading = ElLoading.service({
-      lock: true,
-      text: 'Loading',
-      background: 'rgba(0, 0, 0, 0.7)',
-    })
-
-    const HyperAGI_Miner_NFT_Pledge = await buildContract(node.blockchainId, 'HyperAGI_Miner_NFT_Pledge')
-
-    const pledgeNumArray = await HyperAGI_Miner_NFT_Pledge.getAccountPledgeNum(user.walletAddress)
-
-    console.info('pledgeNumArray:', pledgeNumArray)
-
-    if (parseInt(pledgeNumArray[1]) + 1 > parseInt(pledgeNumArray[0])) {
-      selectNode.value = node
-      selectMinerNftRef.value.show()
-    } else {
-      await active(node)
-    }
-
-    gLoading.close()
-  } catch (e) {
-    console.log(e)
-    gLoading.close()
-    exceptionHandling(e, t)
-  }
-}
-
-async function handleSelectNFT(row) {
-  try {
-    gLoading = ElLoading.service({
-      lock: true,
-      text: 'Loading',
-      background: 'rgba(0, 0, 0, 0.7)',
-    })
-
-    const HyperAGI_Miner_NFT_Pledge = await buildContract(row.blockchainId, 'HyperAGI_Miner_NFT_Pledge')
-    const HyperAGI_Miner_NFT = await buildContract(row.blockchainId, 'HyperAGI_Miner_NFT')
-
-    const approvedAddress = await HyperAGI_Miner_NFT.getApproved(row.tokenId)
-
-    if (approvedAddress.toLowerCase() !== HyperAGI_Miner_NFT_Pledge.target.toLowerCase()) {
-      await (await HyperAGI_Miner_NFT.approve(HyperAGI_Miner_NFT_Pledge.target, parseInt(row.tokenId))).wait()
-    }
-
-    await (await HyperAGI_Miner_NFT_Pledge.pledge(row.tokenId)).wait()
-
-    active(selectNode.value)
-  } catch (e) {
-    console.log(e)
-    gLoading.close()
-    exceptionHandling(e, t)
-  }
 }
 
 //#endregion
@@ -286,7 +208,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
                 </span>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item v-if="row.blockchainStatus === '0x00'" @click="handleActive(row)">Activated</el-dropdown-item>
+                    <el-dropdown-item v-if="row.blockchainStatus === '0x00'" @click="openMinerNftPledge(row)">Activated</el-dropdown-item>
 
                     <el-dropdown-item @click="handleBlockchainMonitoring(row)">{{ t('minerNode.monitoringBtnTxt') }}</el-dropdown-item>
 
@@ -303,9 +225,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
       </div>
     </el-card>
 
-    <MinerNftPledge ref="minerNftPledge"></MinerNftPledge>
-
-    <SelectMinerNft ref="selectMinerNftRef" @ok="handleSelectNFT"></SelectMinerNft>
+    <PledgeDialog ref="pledgeDialogRef"></PledgeDialog>
   </div>
 </template>
 
