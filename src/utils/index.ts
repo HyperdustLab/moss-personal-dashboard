@@ -66,10 +66,30 @@ async function checkChainId(chainId) {
 export async function buildContract(blockchainId, smartContractCode) {
   const user = useUserStore()
 
+  const account = user.walletAddress || user.account
+
   const accounts = await ethereum.request({ method: 'eth_requestAccounts' })
 
-  if (accounts[0].toLowerCase() !== user.walletAddress.toLowerCase()) {
-    throw new Error('Sorry, the current use wallet and login wallet do not match')
+  if (accounts[0].toLowerCase() !== account.toLowerCase()) {
+    const confirmSwitch = await ElMessageBox.confirm(`Please select address in wallet: ${account}\nCurrently connected address: ${accounts[0]}`, 'Please switch to correct wallet address', {
+      confirmButtonText: 'Open wallet to select',
+      cancelButtonText: 'Cancel',
+      type: 'warning',
+      dangerouslyUseHTMLString: true,
+    })
+
+    if (confirmSwitch) {
+      await ethereum.request({
+        method: 'wallet_requestPermissions',
+        params: [{ eth_accounts: {} }],
+      })
+      const newAccounts = await ethereum.request({ method: 'eth_requestAccounts' })
+      if (newAccounts[0].toLowerCase() !== account.toLowerCase()) {
+        throw new Error(`Please select address: ${account}`)
+      }
+    } else {
+      throw new Error('User cancelled wallet switch')
+    }
   }
 
   const blockchain = await getBlockchain(blockchainId)
@@ -217,6 +237,9 @@ export function exceptionHandling(e, t) {
     // Check for network-related errors
     if (e.message.includes('Failed to fetch') || e.message.includes('Network Error')) {
       ElMessage.error(t('errors.networkError'))
+      return
+    } else {
+      ElMessage.error(e.message)
       return
     }
   }
