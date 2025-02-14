@@ -137,7 +137,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
 
           <el-table-column width="300" label="Agent Personalization" align="center">
             <template #default="{ row }">
-              <Moretext :text="row.agent.personalization" />
+              <Moretext v-if="row.agent" :text="row.agent.personalization" />
             </template>
           </el-table-column>
 
