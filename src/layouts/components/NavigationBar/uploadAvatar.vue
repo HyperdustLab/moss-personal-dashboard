@@ -3,8 +3,8 @@
     <UploadImage v-model="avatar"></UploadImage>
     <template #footer>
       <span class="dialog-footer">
-        <el-button @click="dialogVisible = false">{{ $t("cancel") }}</el-button>
-        <el-button type="primary" @click="ok"> {{ $t("confirm") }} </el-button>
+        <el-button @click="dialogVisible = false">{{ $t('cancel') }}</el-button>
+        <el-button type="primary" @click="ok"> {{ $t('confirm') }} </el-button>
       </span>
     </template>
   </el-dialog>

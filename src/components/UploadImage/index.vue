@@ -2,7 +2,7 @@
 
 <template>
   <div>
-    <el-upload v-if="limit === 1" class="avatar-uploader" :show-file-list="false" :action="action" :headers="headers" :on-success="handleAvatarSuccess">
+    <el-upload v-if="limit === 1" class="avatar-uploader" :show-file-list="false" :action="actionComputed" :headers="headers" :on-success="handleAvatarSuccess">
       <img v-if="image" :src="image" class="avatar" />
       <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
     </el-upload>
@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onBeforeMount } from 'vue'
+import { ref, onBeforeMount, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Plus } from '@element-plus/icons-vue'
 import { getToken } from '@/utils/cache/cookies'
@@ -22,7 +22,7 @@ import { getToken } from '@/utils/cache/cookies'
 const props = defineProps({
   modelValue: { type: String, required: true },
   limit: { type: Number, required: true, default: 1 },
-  action: { type: String, required: false },
+  action: { type: String, required: false, default: '/sys/common/upload' },
 })
 
 const fileList = ref<UploadUserFile[]>([])
@@ -43,7 +43,9 @@ const emit = defineEmits(['update:modelValue'])
 
 import api from '@/utils/api'
 
-const action = api.getBaseURL() + props.action || '/sys/common/upload'
+const actionComputed = computed(() => {
+  return api.getBaseURL() + props.action || '/sys/common/upload'
+})
 
 const headers = {
   'X-Access-Token': getToken(),
