@@ -9,6 +9,10 @@
         <el-input v-model="formData.nickName" :placeholder="$t('placeholderTxt')" />
       </el-form-item>
 
+      <el-form-item label="Welcome Message" prop="welcomeMessage">
+        <el-input v-model="welcomeMessage" :autosize="{ minRows: 2, maxRows: 4 }" type="textarea" :placeholder="$t('placeholderTxt')" />
+      </el-form-item>
+
       <el-form-item label="Personalization" prop="personalization">
         <el-input v-model="formData.personalization" :autosize="{ minRows: 2, maxRows: 4 }" type="textarea" :placeholder="$t('placeholderTxt')" />
       </el-form-item>
@@ -24,7 +28,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, nextTick, reactive, onBeforeMount } from 'vue'
+import { ref, nextTick, reactive, onBeforeMount, computed } from 'vue'
 import api from '@/utils/api'
 
 import { ElMessage } from 'element-plus'
@@ -41,6 +45,8 @@ const { t } = useI18n()
 
 const ruleFormRef = ref<FormInstance>(null)
 
+const defaultWelcomeMessage = ref(null)
+
 import { exceptionHandling, buildContract } from '@/utils'
 
 const emit = defineEmits(['ok'])
@@ -54,7 +60,21 @@ const formData = reactive<Record<string, any>>({
   avatar: '',
   nickName: '',
   personalization: '',
+  welcomeMessage: '',
   sid: '',
+})
+
+const welcomeMessage = computed({
+  get: () => {
+    if (formData.welcomeMessage) {
+      return formData.welcomeMessage
+    } else {
+      return defaultWelcomeMessage.value?.replace('[agentName]', formData.nickName) || ''
+    }
+  },
+  set: value => {
+    formData.welcomeMessage = value
+  },
 })
 
 const rules = reactive<FormRules<RuleForm>>({
@@ -81,9 +101,10 @@ function submitForm() {
       try {
         if (isAdd.value) {
           console.info(formData.tokenId, formData.avatar, formData.nickName, formData.personalization)
-          await (await HyperAGI_Agent.mint(formData.tokenId, formData.avatar, formData.nickName, formData.personalization)).wait()
+          await (await HyperAGI_Agent.mintV3(formData.tokenId, [formData.avatar, formData.nickName, formData.personalization, welcomeMessage.value])).wait()
         } else {
-          await (await HyperAGI_Agent.update(formData.sid, formData.avatar, formData.nickName, formData.personalization)).wait()
+          debugger
+          await (await HyperAGI_Agent.updateV3(formData.sid, [formData.avatar, formData.nickName, formData.personalization, welcomeMessage.value])).wait()
         }
 
         emit('ok')
@@ -114,6 +135,7 @@ function show(row) {
       avatar: '',
       nickName: '',
       personalization: '',
+      welcomeMessage: '',
     })
 
     isAdd.value = true
@@ -125,6 +147,10 @@ function show(row) {
     ruleFormRef.value.resetFields()
   })
 }
+
+onBeforeMount(async () => {
+  defaultWelcomeMessage.value = await api.getDictText('sys_config', 'welcomeMessage')
+})
 
 defineExpose({
   show,
