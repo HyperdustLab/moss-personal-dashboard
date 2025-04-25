@@ -184,6 +184,72 @@ async function handleSelectNFT(row) {
   }
 }
 
+async function cancelWithdrawal(node) {
+  try {
+    gLoading = ElLoading.service({
+      lock: true,
+      text: 'Loading',
+      background: 'rgba(0, 0, 0, 0.7)',
+    })
+
+    const HyperAGI_Security_Deposit = await buildContract(node.blockchainId, 'HyperAGI_Security_Deposit')
+
+    await (await HyperAGI_Security_Deposit.cancelWithdrawal(node.minerNodeId)).wait()
+
+    gLoading.close()
+    ElMessage.success('Canceled successfully')
+    handleSearch()
+  } catch (e) {
+    console.log(e)
+    gLoading.close()
+    exceptionHandling(e, t)
+  }
+}
+
+async function applyWithdrawal(node) {
+  try {
+    gLoading = ElLoading.service({
+      lock: true,
+      text: 'Loading',
+      background: 'rgba(0, 0, 0, 0.7)',
+    })
+
+    const HyperAGI_Security_Deposit = await buildContract(node.blockchainId, 'HyperAGI_Security_Deposit')
+
+    await (await HyperAGI_Security_Deposit.applyWithdrawal(node.minerNodeId)).wait()
+
+    gLoading.close()
+    ElMessage.success('Applied successfully')
+    handleSearch()
+  } catch (e) {
+    console.log(e)
+    gLoading.close()
+    exceptionHandling(e, t)
+  }
+}
+
+async function withdrawal(node) {
+  try {
+    gLoading = ElLoading.service({
+      lock: true,
+      text: 'Loading',
+      background: 'rgba(0, 0, 0, 0.7)',
+    })
+
+    const HyperAGI_Security_Deposit = await buildContract(node.blockchainId, 'HyperAGI_Security_Deposit')
+
+    await (await HyperAGI_Security_Deposit.withdrawal(node.minerNodeId)).wait()
+
+    gLoading.close()
+    ElMessage.success('Applied successfully')
+    handleSearch()
+  } catch (e) {
+    console.log(e)
+    gLoading.close()
+    exceptionHandling(e, t)
+  }
+}
+
 //#endregion
 
 /** 监听分页参数的变化 */
@@ -253,6 +319,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
           <el-table-column prop="networkStatus_dictText" :label="t('minerNode.networkStatus')" align="center"> </el-table-column>
           <el-table-column prop="serviceStatus_dictText" label="Service Status" align="center"> </el-table-column>
           <el-table-column prop="blockchainStatus_dictText" label="Blockchain Status" align="center"> </el-table-column>
+          <el-table-column prop="withdrawalTime" label="WithdrawalTime" align="center"> </el-table-column>
           <el-table-column prop="amount" :label="t('minerNode.incomeAmount')" align="center">
             <template #default="{ row }"> {{ toAmount(row.amount) }} HYPT </template>
           </el-table-column>
@@ -287,8 +354,10 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
                 <template #dropdown>
                   <el-dropdown-menu>
                     <el-dropdown-item v-if="row.blockchainStatus === '0x00'" @click="handleActive(row)">Activated</el-dropdown-item>
-
-                    <el-dropdown-item @click="handleBlockchainMonitoring(row)">{{ t('minerNode.monitoringBtnTxt') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="row.blockchainStatus === '0x02'" @click="cancelWithdrawal(row)">Cancel Withdrawal</el-dropdown-item>
+                    <el-dropdown-item v-if="row.blockchainStatus === '0x01'" @click="applyWithdrawal(row)">Apply Withdrawal</el-dropdown-item>
+                    <el-dropdown-item v-if="row.allowWithdrawal" @click="withdrawal(row)">Withdrawal</el-dropdown-item>
+                    <!-- <el-dropdown-item @click="handleBlockchainMonitoring(row)">{{ t('minerNode.monitoringBtnTxt') }}</el-dropdown-item> -->
 
                     <!-- <el-dropdown-item @click="handleBlockchainDelete(row)">{{ t("delete") }}</el-dropdown-item> -->
                   </el-dropdown-menu>

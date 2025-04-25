@@ -141,6 +141,12 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
             </template>
           </el-table-column>
 
+          <el-table-column width="300" label="Welcome Message" align="center">
+            <template #default="{ row }">
+              <Moretext v-if="row.agent" :text="row.agent.welcomeMessage" />
+            </template>
+          </el-table-column>
+
           <el-table-column label="Status" align="center">
             <template #default="{ row }">
               <template v-if="row.agent">{{ row.agent.status_dictText }} </template>
