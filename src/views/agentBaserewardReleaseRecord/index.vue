@@ -226,7 +226,7 @@ watch([() => paginationData.currentPage, () => paginationData.pageSize], getTabl
         </el-tag>
 
         <el-tag style="font-size: 15px; height: 40px; padding-top: 10px; margin-left: 20px">
-          <span>{{ $t('baserewardReleaseRecord.toBeReleasedAmount') }}: {{ toAmount(sumData.toReleaseAmount || 0.0) }}HYPT</span>
+          <span>{{ $t('baserewardReleaseRecord.toBeReleasedAmount') }}: {{ toAmount(sumData.toReleaseAmount - sumData.canReleaseAmount || 0.0) }}HYPT</span>
         </el-tag>
 
         <el-tag style="font-size: 15px; height: 40px; padding-top: 10px; margin-left: 20px">
