@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { storeToRefs } from 'pinia'
 import { useSettingsStore } from '@/store/modules/settings'
-import logo from '@/assets/layouts/logo.png?url'
-import logoText1 from '@/assets/layouts/logo-text-1.png?url'
-import logoText2 from '@/assets/layouts/logo-text-2.png?url'
+import logo from '@/assets/layouts/logo.gif?url'
+import logoText1 from '@/assets/layouts/logo.gif?url'
+import logoText2 from '@/assets/layouts/logo.gif?url'
 import { useUserStore } from '@/store/modules/user'
 
 const userStore = useUserStore()
@@ -20,9 +20,7 @@ const settingsStore = useSettingsStore()
 const { layoutMode } = storeToRefs(settingsStore)
 
 function goHome() {
-  console.info(import.meta.env.VITE_HOME)
-
-  location.href = import.meta.env.VITE_HOME + '/login?token=' + userStore.token
+  location.href = 'https://omega.mossai.com'
 }
 </script>
 
@@ -55,6 +53,7 @@ function goHome() {
   }
   .layout-logo-text {
     height: 50px;
+    margin-left: 25%;
     vertical-align: middle;
   }
 }
