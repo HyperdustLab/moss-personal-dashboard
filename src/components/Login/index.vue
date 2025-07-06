@@ -8,7 +8,7 @@
             <div class="p-6 sm:p-16 h-full">
               <div class="space-y-4">
                 <div class="flex justify-center">
-                  <img src="../../assets/layouts/logo-text-4.png" loading="lazy" class="w-40" alt="tailus logo" />
+                  <img src="../../assets/image/logo2.png" loading="lazy" class="w-40" alt="tailus logo" />
                 </div>
                 <h2 class="mb-8 text-2xl font-bold" style="color: #4ceb75">Sign in to unlock the best of HyperAGI.</h2>
               </div>
@@ -61,8 +61,7 @@
 
               <div class="mt-32 space-y-4 text-gray-400 text-center sm:-mb-8">
                 <p class="text-xs">
-                  By proceeding, you agree to our <a href="https://play.hyperagi.network/termsService" class="underline" target="_blank">Terms of Use</a> and confirm you have read our
-                  <a href="https://play.hyperagi.network/privacyPolicy" class="underline" target="_blank">Privacy and Cookie Statement</a>.
+                  By proceeding, you agree to our <a href="https://app.mossai.com/termsService" class="underline" target="_blank">Terms of Use</a> and confirm you have read our <a href="https://app.mossai.com/privacyPolicy" class="underline" target="_blank">Privacy and Cookie Statement</a>.
                 </p>
                 <p class="text-xs">This site is protected by reCAPTCHA and the <a href="https://policies.google.com/privacy" class="underline" target="_blank">Google Privacy Policy</a> and <a href="https://policies.google.com/terms" class="underline" target="_blank">Terms of Service</a> apply.</p>
               </div>

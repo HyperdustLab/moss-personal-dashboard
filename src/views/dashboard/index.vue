@@ -77,7 +77,7 @@
                 <el-icon size="20">
                   <User />
                 </el-icon>
-                <el-button type="plain" @click="goHome" class="text-sm" link>{{ $t('index.dashboard') }}</el-button>
+                <el-button type="plain" @click="goHome" class="text-sm" link>{{ $t('index.dashboard') }}11</el-button>
               </p>
 
               <p class="flex items-center ml-2 mt-8">

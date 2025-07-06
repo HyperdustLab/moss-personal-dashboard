@@ -77,6 +77,16 @@ export const constantRoutes: RouteRecordRaw[] = [
     },
 
     children: [
+      // UBAIkey
+      {
+        path: 'UBAIkey',
+        component: () => import('@/views/UBAIkey/index.vue'),
+        name: 'UBAIkey',
+        meta: {
+          title: 'UBAIkey',
+          keepAlive: true,
+        },
+      },
       {
         path: 'POPAgent',
         component: () => import('@/views/POPAgent/index.vue'),

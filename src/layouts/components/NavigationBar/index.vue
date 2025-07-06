@@ -66,7 +66,7 @@ function disconnect() {
 }
 
 function goHome() {
-  location.href = import.meta.env.VITE_USER + '/login?token=' + userStore.token
+  location.href = import.meta.env.VITE_USER
 }
 
 async function getBlockchainList() {

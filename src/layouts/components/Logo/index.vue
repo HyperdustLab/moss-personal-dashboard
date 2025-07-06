@@ -1,9 +1,9 @@
 <script lang="ts" setup>
 import { storeToRefs } from 'pinia'
 import { useSettingsStore } from '@/store/modules/settings'
-import logo from '@/assets/layouts/logo.gif?url'
-import logoText1 from '@/assets/layouts/logo.gif?url'
-import logoText2 from '@/assets/layouts/logo.gif?url'
+import logo from '@/assets/image/logo2.png'
+import logoText1 from '@/assets/image/logo2.png'
+import logoText2 from '@/assets/image/logo2.png'
 import { useUserStore } from '@/store/modules/user'
 
 const userStore = useUserStore()
@@ -20,7 +20,7 @@ const settingsStore = useSettingsStore()
 const { layoutMode } = storeToRefs(settingsStore)
 
 function goHome() {
-  location.href = 'https://omega.mossai.com'
+  location.href = 'https://app.mossai.com'
 }
 </script>
 
@@ -28,7 +28,7 @@ function goHome() {
   <div class="layout-logo-container" :class="{ collapse: props.collapse, 'layout-mode-top': layoutMode === 'top' }">
     <transition name="layout-logo-fade">
       <div v-if="props.collapse" key="collapse" @click="goHome">
-        <img :src="logo" style="width: 47px; height: 50px" class="layout-logo" />
+        <img style="width: 47px; height: 50px" class="layout-logo" :src="logo" />
       </div>
       <div v-else key="expand" @click="goHome">
         <img :src="layoutMode !== 'left' ? logoText2 : logoText1" class="layout-logo-text" />
@@ -46,6 +46,7 @@ function goHome() {
   background-color: transparent;
   text-align: center;
   overflow: hidden;
+  margin-top: 10px;
   .layout-logo {
     display: none;
     height: 59px;
